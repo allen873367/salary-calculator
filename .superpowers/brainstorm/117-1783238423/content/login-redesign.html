@@ -1,0 +1,66 @@
+<h2>登入頁重新設計</h2>
+<p class="subtitle">左右分欄 · 簡約但有個性</p>
+
+<div class="section">
+  <h3>方案 A：分割畫面（推薦）</h3>
+  <div style="display:flex;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;min-height:360px;">
+    <!-- Left - Visual -->
+    <div style="flex:1;background:linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);padding:40px;display:flex;flex-direction:column;justify-content:center;color:#fff;min-width:200px;">
+      <div style="font-family:Outfit,sans-serif;font-size:1.8rem;font-weight:700;line-height:1.2;margin-bottom:12px;">
+        打工<br>薪資計算器
+      </div>
+      <div style="font-size:0.9rem;opacity:0.8;max-width:200px;">
+        記錄每一份辛苦，輕鬆掌握收入
+      </div>
+      <div style="margin-top:40px;display:flex;gap:8px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);"></div>
+        <div style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.6);"></div>
+        <div style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);"></div>
+      </div>
+    </div>
+    <!-- Right - Form -->
+    <div style="flex:1;padding:40px;display:flex;flex-direction:column;justify-content:center;background:var(--bg-card);min-width:260px;">
+      <div style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">歡迎回來</div>
+      <div style="font-size:0.85rem;color:var(--muted);margin-bottom:28px;">登入你的帳號繼續使用</div>
+
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:16px;">
+        <label style="font-size:0.78rem;color:var(--muted);font-weight:500;">電子郵件</label>
+        <div style="height:42px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;display:flex;align-items:center;padding:0 14px;font-size:0.88rem;color:var(--muted);transition:border-color 0.2s;" onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor=''">name@example.com</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;">
+        <label style="font-size:0.78rem;color:var(--muted);font-weight:500;">密碼</label>
+        <div style="height:42px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;display:flex;align-items:center;padding:0 14px;font-size:0.88rem;color:var(--muted);">••••••••</div>
+      </div>
+
+      <div style="text-align:right;font-size:0.78rem;color:#2563eb;margin-bottom:24px;cursor:default;">忘記密碼？</div>
+
+      <div style="height:44px;background:#2563eb;color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.9rem;cursor:default;margin-bottom:16px;">登入</div>
+
+      <div style="text-align:center;font-size:0.85rem;color:var(--muted);">
+        還沒有帳號？ <span style="color:#2563eb;font-weight:500;cursor:default;">註冊</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>方案 B：精緻卡片（更簡潔）</h3>
+  <div style="display:flex;gap:20px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:260px;border:1.5px solid var(--border);border-radius:16px;padding:40px;text-align:center;">
+      <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg, #1e40af, #3b82f6);margin:0 auto 20px;display:flex;align-items:center;justify-content:center;">
+        <div style="font-size:1.5rem;">$</div>
+      </div>
+      <div style="font-size:1.3rem;font-weight:700;margin-bottom:4px;">打工薪資計算器</div>
+      <div style="font-size:0.85rem;color:var(--muted);margin-bottom:28px;">登入以存取你的薪資記錄</div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;text-align:left;">
+        <div style="height:44px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:center;padding:0 14px;font-size:0.85rem;color:var(--muted);">電子郵件</div>
+        <div style="height:44px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:center;padding:0 14px;font-size:0.85rem;color:var(--muted);">密碼</div>
+      </div>
+
+      <div style="height:44px;background:#2563eb;color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:600;margin-top:20px;cursor:default;">登入</div>
+    </div>
+  </div>
+  <p style="font-size:0.85rem;color:var(--muted);margin-top:8px;">方案 B 更簡潔，但方案 A 的雙欄佈局更有設計感。你偏好哪個？</p>
+</div>

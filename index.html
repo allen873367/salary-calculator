@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>打工薪資計算器</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================================
+           Design Read: 個人薪資工具 → 簡潔溫暖、值得信賴
+           Dials: VARIANCE:5 / MOTION:4 / DENSITY:4
+           System: 自訂 CSS（Tailwind 精神）
+           ============================================================ */
+
+        /* ===== Reset & Theme Tokens ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --font-display: 'Outfit', 'Segoe UI', -apple-system, sans-serif;
+            --font-body: 'Inter', 'Noto Sans TC', -apple-system, sans-serif;
+
+            /* Light theme */
+            --bg: #f8f7f4;
+            --bg-card: #ffffff;
+            --bg-elevated: #f1f0ec;
+            --bg-input: #ffffff;
+            --border: #e5e2dc;
+            --border-focus: #14b8a6;
+            --text-primary: #1c1917;
+            --text-secondary: #78716c;
+            --text-tertiary: #a8a29e;
+            --accent: #14b8a6;
+            --accent-hover: #0d9488;
+            --accent-subtle: #f0fdfa;
+            --accent-text: #ffffff;
+            --cta: #f43f5e;
+            --cta-hover: #e11d48;
+            --cta-subtle: #fff1f2;
+            --success: #10b981;
+            --success-subtle: #ecfdf5;
+            --danger: #ef4444;
+            --danger-subtle: #fef2f2;
+            --warning: #f59e0b;
+            --shadow-sm: 0 1px 2px rgba(28,25,23,0.04);
+            --shadow-md: 0 4px 12px rgba(28,25,23,0.06), 0 1px 3px rgba(28,25,23,0.04);
+            --shadow-lg: 0 12px 40px rgba(28,25,23,0.08), 0 2px 8px rgba(28,25,23,0.04);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #141210;
+                --bg-card: #1c1917;
+                --bg-elevated: #292524;
+                --bg-input: #292524;
+                --border: #3d3836;
+                --border-focus: #2dd4bf;
+                --text-primary: #f5f5f4;
+                --text-secondary: #a8a29e;
+                --text-tertiary: #78716c;
+                --accent: #2dd4bf;
+                --accent-hover: #5eead4;
+                --accent-subtle: rgba(45,212,191,0.08);
+                --accent-text: #141210;
+                --cta: #fb7185;
+                --cta-hover: #fda4af;
+                --cta-subtle: rgba(244,63,94,0.1);
+                --success: #34d399;
+                --success-subtle: rgba(16,185,129,0.1);
+                --danger: #f87171;
+                --danger-subtle: rgba(239,68,68,0.1);
+                --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+                --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+                --shadow-lg: 0 12px 40px rgba(0,0,0,0.4);
+            }
+        }
+
+        html { font-size: 16px; }
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ===== Layout ===== */
+        .app-wrap {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 24px 20px 48px;
+        }
+
+        /* ===== Header ===== */
+        .app-header {
+            margin-bottom: 32px;
+        }
+        .app-header h1 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .app-header h1 span {
+            background: var(--accent-subtle);
+            color: var(--accent);
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+        .app-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 4px;
+            margin-left: 48px;
+        }
+
+        /* ===== Card ===== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title .badge {
+            font-family: var(--font-body);
+            font-size: 0.72rem;
+            font-weight: 500;
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-left: 4px;
+        }
+
+        /* ===== Form ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 24px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-group label {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.01em;
+        }
+        .form-group label .hint {
+            font-weight: 400;
+            color: var(--text-tertiary);
+            font-size: 0.76rem;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.92rem;
+            font-family: var(--font-body);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.3s;
+            outline: none;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(45,212,191,0.12);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 42px;
+            font-size: 0.88rem;
+        }
+        .form-group .auto-calc {
+            font-size: 0.76rem;
+            color: var(--text-tertiary);
+        }
+
+        /* Select + Add group */
+        .select-add-group {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+        .select-add-group select {
+            flex: 1;
+            min-width: 0;
+        }
+        .select-add-group .btn {
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+        }
+
+        /* ===== Buttons ===== */
+        .btn {
+            padding: 9px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            font-weight: 500;
+            font-family: var(--font-body);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary {
+            background: var(--accent);
+            color: var(--accent-text);
+        }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-cta {
+            background: var(--cta);
+            color: #fff;
+        }
+        .btn-cta:hover { background: var(--cta-hover); }
+        .btn-danger {
+            background: transparent;
+            color: var(--danger);
+            border: 1.5px solid var(--danger);
+        }
+        .btn-danger:hover { background: var(--danger-subtle); }
+        .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1.5px solid var(--border);
+        }
+        .btn-outline:hover {
+            border-color: var(--text-tertiary);
+            background: var(--bg-elevated);
+        }
+        .btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .btn-group.center { justify-content: center; }
+
+        /* ===== Result Box ===== */
+        .result-box {
+            background: var(--accent-subtle);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-sm);
+            padding: 16px 20px;
+            margin-top: 16px;
+            display: none;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        .result-box.show { display: block; }
+        .result-box .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 0.9rem;
+        }
+        .result-box .result-item.total {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--accent);
+            border-top: 1.5px solid var(--accent);
+            margin-top: 6px;
+            padding-top: 10px;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== Tabs ===== */
+        .tabs {
+            display: flex;
+            border-bottom: 1.5px solid var(--border);
+            margin-bottom: 20px;
+            gap: 4px;
+        }
+        .tab {
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            font-family: var(--font-body);
+            color: var(--text-tertiary);
+            cursor: pointer;
+            border: none;
+            background: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1.5px;
+            transition: all 0.2s;
+        }
+        .tab:hover { color: var(--text-secondary); }
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            font-weight: 600;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ===== Filter Bar ===== */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .filter-bar select,
+        .filter-bar input {
+            padding: 7px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-xs);
+            font-size: 0.84rem;
+            font-family: var(--font-body);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            outline: none;
+        }
+        .filter-bar select:focus,
+        .filter-bar input:focus {
+            border-color: var(--border-focus);
+        }
+
+        /* ===== Table ===== */
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.84rem;
+        }
+        thead { background: var(--bg-elevated); }
+        th {
+            text-align: left;
+            padding: 10px 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+            border-bottom: 1.5px solid var(--border);
+        }
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            color: var(--text-primary);
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--accent-subtle); }
+        .text-money { font-weight: 600; font-variant-numeric: tabular-nums; }
+        .text-store {
+            display: inline-block;
+            background: var(--accent-subtle);
+            color: var(--accent);
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .empty-msg {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-tertiary);
+        }
+        .empty-msg .icon { font-size: 2.5rem; margin-bottom: 8px; }
+
+        /* ===== Stats ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .stat-card .label {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .stat-card .value {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+        .stat-card .value.accent { color: var(--accent); }
+        .stat-card .value.cta { color: var(--cta); }
+        .stat-card .value.warning { color: var(--warning); }
+
+        .store-breakdown {
+            display: grid;
+            gap: 6px;
+        }
+        .store-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        .store-row .sname { font-weight: 500; }
+        .store-row .samount { font-weight: 700; color: var(--accent); }
+
+        /* ===== Toast ===== */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 22px;
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.88rem;
+            font-family: var(--font-body);
+            box-shadow: var(--shadow-lg);
+            z-index: 9999;
+            transform: translateX(120%);
+            transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+            max-width: 380px;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: #6366f1; }
+
+        /* ===== Icon-only actions ===== */
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: background 0.15s;
+            opacity: 0.6;
+        }
+        .action-btn:hover { background: var(--bg-elevated); opacity: 1; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 720px) {
+            .app-wrap { padding: 16px 14px 32px; }
+            .card { padding: 20px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .app-header h1 { font-size: 1.4rem; }
+            .app-header p { margin-left: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        @media print {
+            body { background: #fff; }
+            .no-print { display: none !important; }
+            .card {
+                border: 1px solid #ddd;
+                box-shadow: none;
+                break-inside: avoid;
+                padding: 16px;
+            }
+            .table-wrap { border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrap">
+
+        <!-- Toast -->
+        <div id="toast" class="toast"></div>
+
+        <!-- Header -->
+        <header class="app-header no-print">
+            <h1><span>💰</span> 打工薪資計算器</h1>
+            <p>記錄每一份辛苦・輕鬆掌握收入</p>
+        </header>
+
+        <!-- ===== Input Section ===== -->
+        <section class="card no-print" id="input-section">
+            <div class="card-title">
+                <span>📝</span> 新增打工記錄
+                <span class="badge" id="record-count-badge">0 筆</span>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>店家名稱 <span class="hint">*</span></label>
+                    <div class="select-add-group">
+                        <select id="storeSelect" onchange="onStoreSelectChange()"></select>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="addNewStore()" title="新增店家">＋</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>日期 <span class="hint">*</span></label>
+                    <input type="date" id="workDate">
+                </div>
+
+                <div class="form-group">
+                    <label>上班時間 <span class="hint">(24h)</span></label>
+                    <input type="text" id="startTime" placeholder="09:00" maxlength="5" inputmode="numeric">
+                </div>
+
+                <div class="form-group">
+                    <label>下班時間 <span class="hint">(24h)</span></label>
+                    <input type="text" id="endTime" placeholder="18:30" maxlength="5" inputmode="numeric">
+                </div>
+
+                <div class="form-group">
+                    <label>總工時 <span class="hint">(時)</span></label>
+                    <input type="number" id="workHours" step="0.5" min="0" placeholder="自動計算或手動輸入">
+                    <span class="auto-calc" id="hoursHint">輸入上下班時間會自動計算</span>
+                </div>
+
+                <div class="form-group">
+                    <label>時薪 <span class="hint">(元/時) *</span></label>
+                    <input type="number" id="hourlyWage" step="1" min="0" placeholder="196" value="196">
+                    <span class="auto-calc">目前時薪：196 元/時</span>
+                </div>
+
+                <div class="form-group">
+                    <label>加班時數 <span class="hint">(時)</span></label>
+                    <input type="number" id="overtimeHours" step="0.5" min="0" value="0" placeholder="0">
+                </div>
+
+                <div class="form-group">
+                    <label>加班費率</label>
+                    <select id="overtimeRate">
+                        <option value="1.33">1.33 倍（平日延長工時前 2h）</option>
+                        <option value="1.66">1.66 倍（平日延長工時第 3h 起）</option>
+                        <option value="2">2 倍（例假日出勤）</option>
+                        <option value="1">1 倍（無加班費）</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>津貼／獎金 <span class="hint">(元)</span></label>
+                    <input type="number" id="allowance" step="1" value="0" placeholder="0">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>備註</label>
+                    <textarea id="notes" placeholder="例如：早班、晚班、颱風天出勤…" rows="1"></textarea>
+                </div>
+            </div>
+
+            <!-- Result Preview -->
+            <div class="result-box" id="resultBox">
+                <div class="result-item"><span>本薪</span><span id="previewBase" class="text-money">$0</span></div>
+                <div class="result-item"><span>加班費</span><span id="previewOvertime" class="text-money">$0</span></div>
+                <div class="result-item"><span>津貼／獎金</span><span id="previewAllowance" class="text-money">$0</span></div>
+                <div class="result-item total"><span>總計</span><span id="previewTotal" class="text-money">$0</span></div>
+            </div>
+
+            <div class="btn-group center">
+                <button class="btn btn-primary" onclick="saveRecord()">儲存記錄</button>
+                <button class="btn btn-outline" onclick="resetForm()">清空表單</button>
+            </div>
+        </section>
+
+        <!-- ===== Tabs ===== -->
+        <section class="card">
+            <div class="tabs no-print">
+                <button class="tab active" data-tab="records">記錄列表</button>
+                <button class="tab" data-tab="report">統計報表</button>
+            </div>
+
+            <!-- Records Tab -->
+            <div class="tab-content active" id="tab-records">
+                <div class="filter-bar no-print">
+                    <select id="filterStore" onchange="renderRecords()">
+                        <option value="">所有店家</option>
+                    </select>
+                    <select id="filterMonth" onchange="renderRecords()">
+                        <option value="">所有月份</option>
+                    </select>
+                    <button class="btn btn-sm btn-outline" onclick="renderRecords()">重新整理</button>
+                    <button class="btn btn-sm btn-primary" onclick="exportCSV()">匯出 CSV</button>
+                    <button class="btn btn-sm btn-outline" onclick="exportBackup()">備份資料</button>
+                    <button class="btn btn-sm btn-outline" onclick="document.getElementById('importFileInput').click()">還原備份</button>
+                    <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importBackup(event)">
+                    <button class="btn btn-sm btn-danger" onclick="clearAllData()">清除資料</button>
+                </div>
+                <div class="table-wrap" id="recordsTableWrap">
+                    <div class="empty-msg">
+                        <div class="icon">📭</div>
+                        <p>還沒有打工記錄，趕快新增一筆吧！</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Tab -->
+            <div class="tab-content" id="tab-report">
+                <div class="no-print" style="margin-bottom:16px;">
+                    <button class="btn btn-sm btn-outline" onclick="printReport()">列印報表</button>
+                </div>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="label">總收入</div>
+                        <div class="value accent" id="statTotal">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">總筆數</div>
+                        <div class="value" id="statCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">店家數</div>
+                        <div class="value" id="statStores">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">總工時</div>
+                        <div class="value warning" id="statHours">0</div>
+                    </div>
+                </div>
+
+                <div id="reportDetail">
+                    <h3 style="font-family:var(--font-display);font-size:0.95rem;font-weight:600;color:var(--text-secondary);margin:20px 0 10px;">各店家收入</h3>
+                    <div class="store-breakdown" id="storeBreakdown"></div>
+                    <h3 style="font-family:var(--font-display);font-size:0.95rem;font-weight:600;color:var(--text-secondary);margin:20px 0 10px;">每月收入</h3>
+                    <div class="store-breakdown" id="monthBreakdown"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // ============================================================
+        //  Data Layer
+        // ============================================================
+        const STORAGE_KEY = 'parttime_salary_records';
+        const STORES_KEY = 'parttime_stores';
+
+        function getRecords() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+            catch { return []; }
+        }
+
+        function saveRecords(records) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+            // Auto-sync store names from records
+            const stores = [...new Set(records.map(r => r.store))].sort();
+            saveStores(stores);
+            updateUI();
+        }
+
+        function getStores() {
+            try { return JSON.parse(localStorage.getItem(STORES_KEY)) || []; }
+            catch { return []; }
+        }
+
+        function saveStores(stores) {
+            localStorage.setItem(STORES_KEY, JSON.stringify([...new Set(stores)].sort()));
+        }
+
+        function syncStoresFromRecords() {
+            const records = getRecords();
+            const recordStores = [...new Set(records.map(r => r.store))];
+            const savedStores = getStores();
+            const all = [...new Set([...savedStores, ...recordStores])].sort();
+            if (all.length !== savedStores.length) {
+                saveStores(all);
+            }
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        }
+
+        // ============================================================
+        //  Calculation
+        // ============================================================
+        function calcPay(record) {
+            const hours = Number(record.hours) || 0;
+            const wage = Number(record.hourlyWage) || 0;
+            const otHours = Number(record.overtimeHours) || 0;
+            const otRate = Number(record.overtimeRate) || 1;
+            const allowance = Number(record.allowance) || 0;
+            const base = hours * wage;
+            const overtime = otHours * wage * otRate;
+            const total = base + overtime + allowance;
+            return { base: Math.round(base), overtime: Math.round(overtime), allowance, total: Math.round(total) };
+        }
+
+        function autoCalcHours(start, end) {
+            if (!start || !end) return null;
+            const [sh, sm] = start.split(':').map(Number);
+            const [eh, em] = end.split(':').map(Number);
+            let s = sh * 60 + sm;
+            let e = eh * 60 + em;
+            if (e <= s) e += 1440;
+            return Math.round((e - s) / 6) / 10;
+        }
+
+        // ============================================================
+        //  Time Input helpers
+        // ============================================================
+        function formatTimeInput(input) {
+            // On every keystroke: just strip non-digits, no formatting
+            let raw = input.value.replace(/[^0-9]/g, '').slice(0, 4);
+            input.value = raw;
+        }
+
+        function finalizeTimeInput(input) {
+            // On blur: smart-parse raw digits to HH:MM
+            let raw = input.value.replace(/[^0-9]/g, '').slice(0, 4);
+            if (!raw) { input.value = ''; input.style.borderColor = ''; return; }
+
+            let result = '';
+            if (raw.length === 1) {
+                // "8" → "08:00"
+                result = '0' + raw + ':00';
+            } else if (raw.length === 2) {
+                // "16" → "16:00"
+                const h = parseInt(raw, 10);
+                result = (h < 10 ? '0' : '') + h + ':00';
+            } else if (raw.length === 3) {
+                // "830" → "08:30"
+                let h = parseInt(raw[0], 10);
+                let m = parseInt(raw.slice(1), 10);
+                if (h > 23) h = 23;
+                if (m > 59) m = 59;
+                result = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+            } else if (raw.length === 4) {
+                // "1430" → "14:30"
+                let h = parseInt(raw.slice(0, 2), 10);
+                let m = parseInt(raw.slice(2), 10);
+                if (h > 23) h = 23;
+                if (m > 59) m = 59;
+                result = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+            }
+
+            input.value = result;
+            input.style.borderColor = '';
+        }
+
+        // (no separate validate needed — finalizeTimeInput handles validation inline)
+
+        // ============================================================
+        //  DOM Ready
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const startInput = document.getElementById('startTime');
+            const endInput = document.getElementById('endTime');
+            const hoursInput = document.getElementById('workHours');
+
+            // Time formatting: keystroke → raw digits, blur → smart HH:MM
+            [startInput, endInput].forEach(inp => {
+                inp.addEventListener('input', function() { formatTimeInput(this); });
+                inp.addEventListener('blur', function() { finalizeTimeInput(this); });
+            });
+
+            // Auto-calc hours (trigger on change AND blur for formatted times)
+            function onTimeChange() {
+                const calc = autoCalcHours(startInput.value, endInput.value);
+                const hint = document.getElementById('hoursHint');
+                if (calc !== null) {
+                    hoursInput.value = calc;
+                    hint.textContent = `自動計算：${calc} 小時`;
+                    hint.style.color = 'var(--success)';
+                } else {
+                    hint.textContent = '輸入上下班時間會自動計算';
+                    hint.style.color = 'var(--text-tertiary)';
+                }
+                updatePreview();
+            }
+            startInput.addEventListener('change', onTimeChange);
+            startInput.addEventListener('blur', onTimeChange);
+            endInput.addEventListener('change', onTimeChange);
+            endInput.addEventListener('blur', onTimeChange);
+
+            // Live preview
+            document.querySelectorAll('#input-section input, #input-section select, #input-section textarea').forEach(el => {
+                el.addEventListener('input', updatePreview);
+                el.addEventListener('change', updatePreview);
+            });
+
+            // Today's date
+            document.getElementById('workDate').value = new Date().toISOString().slice(0, 10);
+
+            // Tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+                });
+            });
+
+            // Sync stores from existing records on first load
+            syncStoresFromRecords();
+
+            // Textarea auto-resize
+            document.getElementById('notes').addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+
+            updateUI();
+        });
+
+        // ============================================================
+        //  Preview
+        // ============================================================
+        function updatePreview() {
+            const hours = Number(document.getElementById('workHours').value) || 0;
+            const wage = Number(document.getElementById('hourlyWage').value) || 0;
+            const otHours = Number(document.getElementById('overtimeHours').value) || 0;
+            const otRate = Number(document.getElementById('overtimeRate').value) || 1;
+            const allowance = Number(document.getElementById('allowance').value) || 0;
+            const base = hours * wage;
+            const overtime = otHours * wage * otRate;
+            const total = base + overtime + allowance;
+
+            document.getElementById('previewBase').textContent = '$' + Math.round(base).toLocaleString();
+            document.getElementById('previewOvertime').textContent = '$' + Math.round(overtime).toLocaleString();
+            document.getElementById('previewAllowance').textContent = '$' + allowance.toLocaleString();
+            document.getElementById('previewTotal').textContent = '$' + Math.round(total).toLocaleString();
+            document.getElementById('resultBox').classList.toggle('show', hours > 0 || otHours > 0 || allowance > 0);
+        }
+
+        // ============================================================
+        //  CRUD
+        // ============================================================
+        function getFormData() {
+            const store = document.getElementById('storeSelect').value.trim();
+            const date = document.getElementById('workDate').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const hours = Number(document.getElementById('workHours').value) || 0;
+            const wage = Number(document.getElementById('hourlyWage').value) || 0;
+            const otHours = Number(document.getElementById('overtimeHours').value) || 0;
+            const otRate = Number(document.getElementById('overtimeRate').value) || 1;
+            const allowance = Number(document.getElementById('allowance').value) || 0;
+            const notes = document.getElementById('notes').value.trim();
+
+            if (!store) { showToast('請輸入店家名稱！', 'error'); return null; }
+            if (!date) { showToast('請選擇日期！', 'error'); return null; }
+            if (hours <= 0) { showToast('請輸入工時！', 'error'); return null; }
+            if (wage <= 0) { showToast('請輸入時薪！', 'error'); return null; }
+            return { store, date, startTime, endTime, hours, hourlyWage: wage, overtimeHours: otHours, overtimeRate: otRate, allowance, notes };
+        }
+
+        function saveRecord() {
+            const data = getFormData();
+            if (!data) return;
+            const records = getRecords();
+            records.push({ ...data, id: generateId(), createdAt: new Date().toISOString() });
+            saveRecords(records);
+            showToast(`已儲存 ${data.store} 的薪資記錄！`, 'success');
+            resetForm();
+        }
+
+        function deleteRecord(id, silent) {
+            if (!silent && !confirm('確定要刪除這筆記錄嗎？')) return;
+            let records = getRecords();
+            records = records.filter(r => r.id !== id);
+            saveRecords(records);
+            if (!silent) showToast('已刪除記錄', 'info');
+        }
+
+        function editRecord(id) {
+            const records = getRecords();
+            const r = records.find(r => r.id === id);
+            if (!r) return;
+            document.getElementById('storeSelect').value = r.store;
+            document.getElementById('workDate').value = r.date;
+            document.getElementById('startTime').value = r.startTime || '';
+            document.getElementById('endTime').value = r.endTime || '';
+            document.getElementById('workHours').value = r.hours;
+            document.getElementById('hourlyWage').value = r.hourlyWage;
+            document.getElementById('overtimeHours').value = r.overtimeHours || 0;
+            document.getElementById('overtimeRate').value = r.overtimeRate || 1.33;
+            document.getElementById('allowance').value = r.allowance || 0;
+            document.getElementById('notes').value = r.notes || '';
+
+            // Update hours hint if start/end time exist
+            const hint = document.getElementById('hoursHint');
+            if (r.startTime && r.endTime) {
+                hint.textContent = `自動計算：${r.hours} 小時`;
+                hint.style.color = 'var(--success)';
+            } else {
+                hint.textContent = '輸入上下班時間會自動計算';
+                hint.style.color = 'var(--text-tertiary)';
+            }
+
+            // Scroll to form and delete old record silently
+            document.getElementById('input-section').scrollIntoView({ behavior: 'smooth' });
+            deleteRecord(id, true);
+            updatePreview();
+        }
+
+        function resetForm() {
+            document.getElementById('storeSelect').value = '';
+            document.getElementById('workDate').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('startTime').value = '';
+            document.getElementById('endTime').value = '';
+            document.getElementById('workHours').value = '';
+            document.getElementById('hourlyWage').value = 196;
+            document.getElementById('overtimeHours').value = 0;
+            document.getElementById('overtimeRate').value = 1.33;
+            document.getElementById('allowance').value = 0;
+            document.getElementById('notes').value = '';
+            document.getElementById('resultBox').classList.remove('show');
+            document.getElementById('hoursHint').textContent = '輸入上下班時間會自動計算';
+            document.getElementById('hoursHint').style.color = 'var(--text-tertiary)';
+            document.getElementById('storeSelect').focus();
+        }
+
+        function clearAllData() {
+            if (!confirm('確定要清除所有打工資料嗎？此操作無法復原！')) return;
+            if (!confirm('最後確認：真的要全部刪除嗎？')) return;
+            localStorage.removeItem(STORAGE_KEY);
+            updateUI();
+            showToast('已清除所有資料', 'info');
+        }
+
+        // ============================================================
+        //  Render
+        // ============================================================
+        function updateUI() {
+            updateRecordBadge();
+            populateStoreSelect();
+            populateFilters();
+            renderRecords();
+            renderReport();
+        }
+
+        function updateRecordBadge() {
+            document.getElementById('record-count-badge').textContent = getRecords().length + ' 筆';
+        }
+
+        // ============================================================
+        //  Store Select
+        // ============================================================
+        function populateStoreSelect() {
+            const stores = getStores();
+            const sel = document.getElementById('storeSelect');
+            const current = sel.value;
+            sel.innerHTML = '<option value="">-- 選擇店家 --</option>' +
+                stores.map(s => `<option value="${s}">${s}</option>`).join('');
+            // Restore selection if still valid
+            if (current && stores.includes(current)) sel.value = current;
+        }
+
+        function onStoreSelectChange() {
+            updatePreview();
+        }
+
+        function addNewStore() {
+            const name = prompt('請輸入新的店家名稱：');
+            if (!name || !name.trim()) return;
+            const s = name.trim();
+            const stores = getStores();
+            if (stores.includes(s)) {
+                document.getElementById('storeSelect').value = s;
+                showToast('該店家已存在', 'info');
+                return;
+            }
+            saveStores([...stores, s]);
+            populateStoreSelect();
+            document.getElementById('storeSelect').value = s;
+            showToast(`已新增店家：${s}`, 'success');
+            updatePreview();
+        }
+
+        function populateFilters() {
+            const records = getRecords();
+            const stores = [...new Set(records.map(r => r.store))].sort();
+            const sSel = document.getElementById('filterStore');
+            const curStore = sSel.value;
+            sSel.innerHTML = '<option value="">所有店家</option>' + stores.map(s => `<option value="${s}">${s}</option>`).join('');
+            sSel.value = curStore || '';
+
+            const months = [...new Set(records.map(r => r.date.slice(0, 7)))].sort().reverse();
+            const mSel = document.getElementById('filterMonth');
+            const curMonth = mSel.value;
+            mSel.innerHTML = '<option value="">所有月份</option>' +
+                months.map(m => {
+                    const [y, mo] = m.split('-');
+                    return `<option value="${m}">${y} 年 ${parseInt(mo)} 月</option>`;
+                }).join('');
+            mSel.value = curMonth || '';
+        }
+
+        function renderRecords() {
+            let records = getRecords();
+            const fs = document.getElementById('filterStore').value;
+            const fm = document.getElementById('filterMonth').value;
+            if (fs) records = records.filter(r => r.store === fs);
+            if (fm) records = records.filter(r => r.date.startsWith(fm));
+            records.sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(b.id));
+
+            const wrap = document.getElementById('recordsTableWrap');
+            if (records.length === 0) {
+                wrap.innerHTML = '<div class="empty-msg"><div class="icon">📭</div><p>沒有符合的打工記錄</p></div>';
+                return;
+            }
+
+            let html = `<table><thead><tr>
+                <th>日期</th><th>店家</th><th>時薪</th><th>工時</th>
+                <th>加班</th><th>津貼</th><th style="text-align:right;">本薪</th>
+                <th style="text-align:right;">合計</th><th style="text-align:center;">操作</th>
+            </tr></thead><tbody>`;
+
+            records.forEach(r => {
+                const pay = calcPay(r);
+                const d = r.date.replace(/-/g, '/');
+                const t = r.startTime && r.endTime ? `<br><span style="font-size:0.75rem;color:var(--text-tertiary);">${r.startTime}-${r.endTime}</span>` : '';
+                html += `<tr>
+                    <td style="white-space:nowrap;">${d}${t}</td>
+                    <td><span class="text-store">${escHtml(r.store)}</span></td>
+                    <td>$${r.hourlyWage}</td>
+                    <td>${r.hours}h</td>
+                    <td>${r.overtimeHours > 0 ? r.overtimeHours+'h' : '-'}</td>
+                    <td>${r.allowance > 0 ? '$'+Number(r.allowance).toLocaleString() : '-'}</td>
+                    <td style="text-align:right;" class="text-money">$${pay.base.toLocaleString()}</td>
+                    <td style="text-align:right;font-weight:700;color:var(--accent);">$${pay.total.toLocaleString()}</td>
+                    <td style="text-align:center;white-space:nowrap;">
+                        <button class="action-btn" onclick="editRecord('${r.id}')" title="編輯">✏️</button>
+                        <button class="action-btn" onclick="deleteRecord('${r.id}')" title="刪除">🗑</button>
+                    </td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            wrap.innerHTML = html;
+        }
+
+        function renderReport() {
+            const records = getRecords();
+            if (records.length === 0) {
+                document.getElementById('statTotal').textContent = '$0';
+                document.getElementById('statCount').textContent = '0';
+                document.getElementById('statStores').textContent = '0';
+                document.getElementById('statHours').textContent = '0';
+                document.getElementById('storeBreakdown').innerHTML = '<div class="empty-msg" style="padding:20px;"><p>尚無資料</p></div>';
+                document.getElementById('monthBreakdown').innerHTML = '<div class="empty-msg" style="padding:20px;"><p>尚無資料</p></div>';
+                return;
+            }
+
+            let totalPay = 0, totalHours = 0;
+            const storeMap = {}, monthMap = {};
+
+            records.forEach(r => {
+                const pay = calcPay(r);
+                totalPay += pay.total;
+                totalHours += Number(r.hours) || 0;
+                storeMap[r.store] = (storeMap[r.store] || 0) + pay.total;
+                const m = r.date.slice(0, 7);
+                monthMap[m] = (monthMap[m] || 0) + pay.total;
+            });
+
+            document.getElementById('statTotal').textContent = '$' + Math.round(totalPay).toLocaleString();
+            document.getElementById('statCount').textContent = records.length;
+            document.getElementById('statStores').textContent = Object.keys(storeMap).length;
+            document.getElementById('statHours').textContent = totalHours.toFixed(1);
+
+            const storeSorted = Object.entries(storeMap).sort((a, b) => b[1] - a[1]);
+            document.getElementById('storeBreakdown').innerHTML = storeSorted.map(([name, amt]) => {
+                const pct = ((amt / totalPay) * 100).toFixed(1);
+                return `<div class="store-row">
+                    <span class="sname">${escHtml(name)}</span>
+                    <span><span class="samount">$${Math.round(amt).toLocaleString()}</span> <span style="color:var(--text-tertiary);font-size:0.8rem;">(${pct}%)</span></span>
+                </div>`;
+            }).join('');
+
+            const monthSorted = Object.entries(monthMap).sort((a, b) => b[0].localeCompare(a[0]));
+            document.getElementById('monthBreakdown').innerHTML = monthSorted.map(([m, amt]) => {
+                const [y, mo] = m.split('-');
+                const pct = ((amt / totalPay) * 100).toFixed(1);
+                return `<div class="store-row">
+                    <span class="sname">${y} 年 ${parseInt(mo)} 月</span>
+                    <span><span class="samount" style="color:var(--success);">$${Math.round(amt).toLocaleString()}</span> <span style="color:var(--text-tertiary);font-size:0.8rem;">(${pct}%)</span></span>
+                </div>`;
+            }).join('');
+        }
+
+        // ============================================================
+        //  Export & Print
+        // ============================================================
+        function exportCSV() {
+            const records = getRecords();
+            if (records.length === 0) { showToast('沒有資料可以匯出', 'error'); return; }
+            let csv = '﻿';
+            csv += '日期,上班,下班,店家名稱,時薪,工時(時),加班時數,加班費率,津貼,本薪,加班費,合計,備註\n';
+            records.sort((a, b) => a.date.localeCompare(b.date)).forEach(r => {
+                const pay = calcPay(r);
+                csv += [r.date, r.startTime||'', r.endTime||'', r.store, r.hourlyWage, r.hours,
+                    r.overtimeHours||0, r.overtimeRate||1, r.allowance||0, pay.base, pay.overtime,
+                    pay.total, (r.notes||'').replace(/,/g, '，')].join(',') + '\n';
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '打工薪資報表_' + new Date().toISOString().slice(0, 10) + '.csv';
+            link.click();
+            URL.revokeObjectURL(link.href);
+            showToast('CSV 報表已下載！', 'success');
+        }
+
+        function exportBackup() {
+            const records = getRecords();
+            if (records.length === 0) { showToast('沒有資料可以備份', 'error'); return; }
+            const backup = { version: 1, exportedAt: new Date().toISOString(), records };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '打工薪資備份_' + new Date().toISOString().slice(0, 10) + '.json';
+            link.click();
+            URL.revokeObjectURL(link.href);
+            showToast('備份檔已下載！請妥善保存', 'success');
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.records || !Array.isArray(data.records) || data.records.length === 0) {
+                        showToast('備份檔格式錯誤或無資料', 'error');
+                        return;
+                    }
+                    if (!confirm(`將以 ${data.records.length} 筆備份資料取代現有資料（${getRecords().length} 筆），確定嗎？`)) return;
+                    saveRecords(data.records);
+                    showToast(`成功還原 ${data.records.length} 筆資料！`, 'success');
+                } catch (err) {
+                    showToast('無法讀取備份檔：' + err.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function printReport() {
+            const records = getRecords();
+            if (records.length === 0) { showToast('沒有資料可以列印', 'error'); return; }
+
+            let totalPay = 0, totalHours = 0;
+            const storeMap = {}, monthMap = {};
+            records.forEach(r => {
+                const pay = calcPay(r);
+                totalPay += pay.total;
+                totalHours += Number(r.hours) || 0;
+                storeMap[r.store] = (storeMap[r.store] || 0) + pay.total;
+                monthMap[r.date.slice(0, 7)] = (monthMap[r.date.slice(0, 7)] || 0) + pay.total;
+            });
+
+            let h = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>打工薪資報表</title>
+            <style>body{font-family:'Inter','Noto Sans TC',sans-serif;padding:24px;max-width:800px;margin:0 auto;color:#1c1917;}
+            h1{font-family:'Outfit',sans-serif;font-size:1.6rem;text-align:center;}
+            table{width:100%;border-collapse:collapse;font-size:0.85rem;margin-bottom:20px;}
+            th{background:#f1f0ec;padding:8px 12px;text-align:left;border-bottom:2px solid #e5e2dc;font-size:0.78rem;color:#78716c;}
+            td{padding:6px 12px;border-bottom:1px solid #e5e2dc;}
+            .r{text-align:right;font-weight:600;}
+            .s{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:24px;}
+            .c{background:#f1f0ec;padding:12px;border-radius:8px;text-align:center;}
+            .c div:first-child{font-size:0.8rem;color:#78716c;}
+            .c div:last-child{font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;margin-top:4px;}
+            .tc{text-align:center;color:#a8a29e;font-size:0.8rem;margin-top:24px;}
+            </style></head><body>
+            <h1>💰 打工薪資報表</h1>
+            <p style="text-align:center;color:#78716c;margin-bottom:20px;">${new Date().toLocaleDateString('zh-TW')}</p>
+            <div class="s">
+                <div class="c"><div>總收入</div><div style="color:#14b8a6;">$${Math.round(totalPay).toLocaleString()}</div></div>
+                <div class="c"><div>總筆數</div><div>${records.length}</div></div>
+                <div class="c"><div>店家數</div><div>${Object.keys(storeMap).length}</div></div>
+                <div class="c"><div>總工時</div><div>${totalHours.toFixed(1)}h</div></div>
+            </div>`;
+
+            h += '<h2 style="font-size:1rem;margin-bottom:8px;">各店家統計</h2><table><thead><tr><th>店家</th><th class="r">金額</th><th class="r">佔比</th></tr></thead><tbody>';
+            Object.entries(storeMap).sort((a,b) => b[1]-a[1]).forEach(([n, a]) => {
+                h += `<tr><td>${escHtml(n)}</td><td class="r">$${Math.round(a).toLocaleString()}</td><td class="r" style="color:#78716c;">${((a/totalPay)*100).toFixed(1)}%</td></tr>`;
+            });
+            h += '</tbody></table>';
+
+            h += '<h2 style="font-size:1rem;margin-bottom:8px;">每月統計</h2><table><thead><tr><th>月份</th><th class="r">金額</th><th class="r">佔比</th></tr></thead><tbody>';
+            Object.entries(monthMap).sort((a,b) => b[0].localeCompare(a[0])).forEach(([m, a]) => {
+                const [y, mo] = m.split('-');
+                h += `<tr><td>${y} 年 ${parseInt(mo)} 月</td><td class="r">$${Math.round(a).toLocaleString()}</td><td class="r" style="color:#78716c;">${((a/totalPay)*100).toFixed(1)}%</td></tr>`;
+            });
+            h += '</tbody></table>';
+
+            h += '<h2 style="font-size:1rem;margin-bottom:8px;">詳細記錄</h2><table><thead><tr><th>日期</th><th>店家</th><th class="r">時薪</th><th class="r">工時</th><th class="r">本薪</th><th class="r">合計</th></tr></thead><tbody>';
+            records.sort((a,b) => b.date.localeCompare(a.date)).forEach(r => {
+                const pay = calcPay(r);
+                h += `<tr><td>${r.date.replace(/-/g,'/')}</td><td>${escHtml(r.store)}</td><td class="r">$${r.hourlyWage}</td><td class="r">${r.hours}h${r.overtimeHours>0?' +'+r.overtimeHours+'h':''}</td><td class="r">$${pay.base.toLocaleString()}</td><td class="r" style="color:#14b8a6;">$${pay.total.toLocaleString()}</td></tr>`;
+            });
+            h += '</tbody></table><p class="tc">由打工薪資計算器產生</p></body></html>';
+
+            const w = window.open('', '_blank', 'width=800,height=600');
+            w.document.write(h);
+            w.document.close();
+            w.focus();
+            setTimeout(() => w.print(), 300);
+        }
+
+        // ============================================================
+        //  Utils
+        // ============================================================
+        function escHtml(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast ' + type + ' show';
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<h2>設計更新</h2>
+<p class="subtitle">倍率下拉選單 + 使用者登入系統</p>
+
+<div class="section">
+  <h3>薪資倍率下拉選單</h3>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <div style="font-size:0.78rem;color:var(--muted);">薪資倍率</div>
+      <select style="padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;background:var(--bg);min-width:180px;">
+        <option>1.0x — 一般平日</option>
+        <option>1.33x — 平日延長工時前 2h</option>
+        <option>1.66x — 平日延長工時第 3h 起</option>
+        <option>2.0x — 國定假日／颱風天</option>
+        <option>2.66x — 休息日出勤</option>
+      </select>
+    </div>
+  </div>
+  <p style="margin-top:8px;font-size:0.85rem;color:var(--muted);">這樣直覺又好選，不用手打數字</p>
+</div>
+
+<div class="section">
+  <h3>使用者系統</h3>
+  <div style="display:flex;gap:20px;flex-wrap:wrap;">
+    <!-- Login page mockup -->
+    <div style="flex:1;min-width:240px;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div style="background:#2563eb;color:#fff;padding:8px 14px;font-size:0.82rem;font-weight:500;">登入頁面</div>
+      <div style="padding:24px;text-align:center;">
+        <div style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">打工薪資計算器</div>
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:20px;">登入以存取你的薪資記錄</div>
+        <div style="height:38px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;margin-bottom:10px;display:flex;align-items:center;padding:0 12px;font-size:0.82rem;color:var(--muted);">電子郵件</div>
+        <div style="height:38px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;margin-bottom:20px;display:flex;align-items:center;padding:0 12px;font-size:0.82rem;color:var(--muted);">密碼</div>
+        <div style="height:40px;background:#2563eb;color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:500;margin-bottom:10px;">登入</div>
+        <div style="font-size:0.82rem;color:var(--muted);">還沒有帳號？<span style="color:#2563eb;font-weight:500;">註冊</span></div>
+      </div>
+    </div>
+    <!-- How it works -->
+    <div style="flex:1.5;min-width:280px;">
+      <div style="font-weight:600;margin-bottom:10px;">技術實作</div>
+      <div style="display:grid;gap:8px;">
+        <div style="display:flex;gap:10px;align-items:start;">
+          <div style="background:#2563eb;color:#fff;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600;flex-shrink:0;">1</div>
+          <div><strong>註冊／登入</strong> — Email + 密碼，使用 JWT Token</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:start;">
+          <div style="background:#2563eb;color:#fff;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600;flex-shrink:0;">2</div>
+          <div><strong>資料隔離</strong> — 每個人只能看到自己的記錄（API 自動過濾）</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:start;">
+          <div style="background:#2563eb;color:#fff;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600;flex-shrink:0;">3</div>
+          <div><strong>跨裝置</strong> — 只要有網路和帳號，任何電腦都能存取</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:start;">
+          <div style="background:#2563eb;color:#fff;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600;flex-shrink:0;">4</div>
+          <div><strong>時薪預設 196</strong> — 新增記錄時自動填入</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>更新後的 Model</h3>
+  <pre style="background:var(--bg);padding:16px;border-radius:8px;font-size:0.82rem;line-height:1.6;overflow-x:auto;">
+class WorkRecord(models.Model):
+    user = ForeignKey(User, on_delete=CASCADE)        # 綁定使用者
+    store = ForeignKey(Store, on_delete=CASCADE)       # 店家
+    date = DateField()                                 # 日期
+    start_time = TimeField(null=True, blank=True)       # 上班
+    end_time = TimeField(null=True, blank=True)         # 下班
+    hours = DecimalField(max_digits=5, decimal_places=1)      # 工時
+    hourly_wage = PositiveIntegerField(default=196)            # 時薪 (預設196)
+    rate_multiplier = DecimalField(max_digits=3, decimal_places=1, default=1.0)  # 倍率下拉
+    overtime_hours = DecimalField(max_digits=4, decimal_places=1, default=0)
+    overtime_rate = DecimalField(max_digits=3, decimal_places=2, default=1.33)
+    notes = TextField(blank=True)
+  </pre>
+</div>

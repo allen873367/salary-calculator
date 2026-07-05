@@ -1,0 +1,107 @@
+<h2>打工薪資計算器 — 設計方向</h2>
+<p class="subtitle">Django REST + React · 個人工具 · 簡潔專業風格</p>
+
+<div class="section">
+  <h3>Design Read</h3>
+  <p>個人記帳工具 → 簡潔、可信賴、專業但溫暖，偏向 clean productivity 語彙</p>
+</div>
+
+<div class="section">
+  <h3>設計調校 (Dials)</h3>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;">
+    <div style="background:var(--bg-card);padding:16px 24px;border-radius:12px;border:1px solid var(--border);text-align:center;flex:1;min-width:140px;">
+      <div style="font-size:0.75rem;color:var(--muted);letter-spacing:0.1em;">VARIANCE</div>
+      <div style="font-size:2rem;font-weight:700;color:var(--accent);">5</div>
+      <div style="font-size:0.72rem;color:var(--muted);">對稱但有空氣感</div>
+    </div>
+    <div style="background:var(--bg-card);padding:16px 24px;border-radius:12px;border:1px solid var(--border);text-align:center;flex:1;min-width:140px;">
+      <div style="font-size:0.75rem;color:var(--muted);letter-spacing:0.1em;">MOTION</div>
+      <div style="font-size:2rem;font-weight:700;color:var(--accent);">4</div>
+      <div style="font-size:0.72rem;color:var(--muted);">柔和過場·無炫技</div>
+    </div>
+    <div style="background:var(--bg-card);padding:16px 24px;border-radius:12px;border:1px solid var(--border);text-align:center;flex:1;min-width:140px;">
+      <div style="font-size:0.75rem;color:var(--muted);letter-spacing:0.1em;">DENSITY</div>
+      <div style="font-size:2rem;font-weight:700;color:var(--accent);">4</div>
+      <div style="font-size:0.72rem;color:var(--muted);">資料清楚·不擁擠</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>色彩計畫</h3>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+    <div style="width:64px;height:64px;border-radius:12px;background:#14b8a6;border:2px solid var(--border);"></div>
+    <div style="width:64px;height:64px;border-radius:12px;background:#0d9488;border:2px solid var(--border);"></div>
+    <div style="width:64px;height:64px;border-radius:12px;background:#f8f7f4;border:2px solid var(--border);"></div>
+    <div style="width:64px;height:64px;border-radius:12px;background:#1c1917;border:2px solid var(--border);"></div>
+    <div style="width:64px;height:64px;border-radius:12px;background:#78716c;border:2px solid var(--border);"></div>
+    <div style="width:64px;height:64px;border-radius:12px;background:#f43f5e;border:2px solid var(--border);"></div>
+  </div>
+  <p><strong>主色：</strong>Teal (#14b8a6) · <strong>強調：</strong>Rose (#f43f5e) · <strong>底色：</strong>暖白 (#f8f7f4)<br>
+  <strong>深色模式：</strong>全自動支援 prefers-color-scheme</p>
+</div>
+
+<div class="section">
+  <h3>字體</h3>
+  <p style="font-family:Outfit,sans-serif;font-size:1.5rem;font-weight:700;">Outfit — 標題字體 · 現代俐落</p>
+  <p style="font-family:Inter,sans-serif;font-size:1rem;">Inter — 內文字體 · 清晰易讀</p>
+</div>
+
+<div class="section">
+  <h2>版型預覽</h2>
+  <p class="subtitle">整體頁面結構</p>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">薪資計算器 — 整體佈局</div>
+  <div class="mockup-body" style="padding:0;">
+    <!-- Header -->
+    <div style="border-bottom:1px solid var(--border);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-weight:600;">打工薪資計算器</div>
+      <div style="display:flex;gap:16px;font-size:0.85rem;color:var(--muted);">
+        <span style="font-weight:600;color:var(--accent);">新增</span>
+        <span>記錄</span>
+        <span>報表</span>
+      </div>
+    </div>
+    <!-- Two columns -->
+    <div style="display:flex;gap:0;min-height:300px;">
+      <!-- Left: Form -->
+      <div style="flex:1;padding:20px;border-right:1px solid var(--border);">
+        <div style="font-size:0.85rem;font-weight:600;margin-bottom:16px;">新增打工記錄</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="height:36px;background:var(--bg);border-radius:6px;"></div>
+          <div style="height:36px;background:var(--bg);border-radius:6px;"></div>
+          <div style="height:36px;background:var(--bg);border-radius:6px;"></div>
+          <div style="height:36px;background:var(--bg);border-radius:6px;"></div>
+          <div style="height:36px;background:var(--bg);border-radius:6px;"></div>
+          <div style="height:36px;background:var(--bg);border-radius:6px;"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <div style="height:36px;width:100px;background:var(--accent);border-radius:6px;"></div>
+          <div style="height:36px;width:80px;background:var(--bg);border:1px solid var(--border);border-radius:6px;"></div>
+        </div>
+      </div>
+      <!-- Right: Preview -->
+      <div style="width:240px;padding:20px;background:var(--bg);">
+        <div style="font-size:0.85rem;font-weight:600;margin-bottom:12px;">試算預覽</div>
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:6px;"><span>本薪</span><span>$0</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:6px;"><span>加班費</span><span>$0</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:6px;"><span>加班倍率</span><span>1.0x</span></div>
+        <div style="border-top:1px solid var(--border);margin:8px 0;padding-top:8px;display:flex;justify-content:space-between;font-weight:700;color:var(--accent);"><span>總計</span><span>$0</span></div>
+      </div>
+    </div>
+    <!-- Records table -->
+    <div style="border-top:1px solid var(--border);padding:16px 20px;">
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <div style="height:30px;width:140px;background:var(--bg);border-radius:6px;"></div>
+        <div style="height:30px;width:100px;background:var(--bg);border-radius:6px;"></div>
+        <div style="height:30px;width:80px;background:var(--bg);border-radius:6px;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.78rem;color:var(--muted);font-weight:500;">
+        <span>日期</span><span>店家</span><span>工時</span><span style="text-align:right;">本薪</span><span style="text-align:right;">合計</span>
+      </div>
+      <div style="padding:20px 0;text-align:center;color:var(--muted);font-size:0.85rem;">還沒有打工記錄</div>
+    </div>
+  </div>
+</div>
