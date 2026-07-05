@@ -23,8 +23,9 @@ def generate_csv(records):
     # Monthly summary rows
     writer.writerow([])
     writer.writerow(['月份', '當月總計'])
-    for month in sorted(month_totals.keys()):
-        writer.writerow([month, month_totals[month]])
+    for month_key in sorted(month_totals.keys()):
+        y, m = month_key.split('-')
+        writer.writerow([f'{y} 年 {int(m)} 月', month_totals[month_key]])
 
     return output.getvalue()
 
