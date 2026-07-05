@@ -1,6 +1,28 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../../utils/api';
 
+function smartTime(raw) {
+  if (!raw) return '';
+  let digits = raw.replace(/[^0-9]/g, '').slice(0, 4);
+  if (!digits) return '';
+  if (digits.length === 1) return '0' + digits + ':00';
+  if (digits.length === 2) {
+    let h = parseInt(digits);
+    if (h > 23) return '23:59';
+    return digits + ':00';
+  }
+  if (digits.length === 3) {
+    let h = parseInt(digits[0]), m = parseInt(digits.slice(1));
+    if (h > 23) h = 23;
+    if (m > 59) m = 59;
+    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+  }
+  let h = parseInt(digits.slice(0, 2)), m = parseInt(digits.slice(2));
+  if (h > 23) h = 23;
+  if (m > 59) m = 59;
+  return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+}
+
 const RATE_OPTIONS = [
   { value: '1.0', label: '1.0x — 一般平日' },
   { value: '1.33', label: '1.33x — 平日延長工時前 2h' },
@@ -195,12 +217,14 @@ export default function RecordList() {
                 <div className="form-group">
                   <label>上班</label>
                   <input type="text" inputMode="numeric" placeholder="09:00" value={editRecord.start_time}
-                    onChange={(e) => setEditRecord({...editRecord, start_time: e.target.value})} />
+                    onChange={(e) => setEditRecord({...editRecord, start_time: e.target.value.replace(/[^0-9]/g, '').slice(0, 4)})}
+                    onBlur={(e) => setEditRecord({...editRecord, start_time: smartTime(e.target.value)})} />
                 </div>
                 <div className="form-group">
                   <label>下班</label>
                   <input type="text" inputMode="numeric" placeholder="18:00" value={editRecord.end_time}
-                    onChange={(e) => setEditRecord({...editRecord, end_time: e.target.value})} />
+                    onChange={(e) => setEditRecord({...editRecord, end_time: e.target.value.replace(/[^0-9]/g, '').slice(0, 4)})}
+                    onBlur={(e) => setEditRecord({...editRecord, end_time: smartTime(e.target.value)})} />
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>

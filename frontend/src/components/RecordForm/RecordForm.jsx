@@ -15,7 +15,11 @@ function smartTime(raw) {
   let digits = raw.replace(/[^0-9]/g, '').slice(0, 4);
   if (!digits) return '';
   if (digits.length === 1) return '0' + digits + ':00';
-  if (digits.length === 2) return digits + ':00';
+  if (digits.length === 2) {
+    let h = parseInt(digits);
+    if (h > 23) return '23:59';
+    return digits + ':00';
+  }
   if (digits.length === 3) {
     let h = parseInt(digits[0]), m = parseInt(digits.slice(1));
     if (h > 23) h = 23;
