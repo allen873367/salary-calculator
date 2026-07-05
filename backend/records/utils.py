@@ -6,19 +6,25 @@ def generate_csv(records):
     output = io.StringIO()
     output.write('﻿')  # BOM for Excel
     writer = csv.writer(output)
-    writer.writerow(['日期', '店家', '時薪', '薪資倍率', '工時', '本薪',
-                     '加班時數', '加班費率', '加班費', '合計', '備註'])
+    writer.writerow(['日期', '店家', '時薪', '薪資倍率', '工時', '本薪', '合計', '備註'])
+
+    from collections import defaultdict
+    month_totals = defaultdict(int)
 
     for r in records:
         pay = r.total_pay()
         base_pay = round(float(r.hours) * float(r.hourly_wage) * float(r.rate_multiplier))
-        overtime_pay = round(float(r.overtime_hours) * float(r.hourly_wage) * float(r.overtime_rate))
+        month_totals[r.date.strftime('%Y-%m')] += pay
         writer.writerow([
             r.date, r.store.name if r.store else '', r.hourly_wage,
-            r.rate_multiplier, r.hours, base_pay,
-            r.overtime_hours, r.overtime_rate, overtime_pay,
-            pay, r.notes
+            r.rate_multiplier, r.hours, base_pay, pay, r.notes
         ])
+
+    # Monthly summary rows
+    writer.writerow([])
+    writer.writerow(['月份', '當月總計'])
+    for month in sorted(month_totals.keys()):
+        writer.writerow([month, month_totals[month]])
 
     return output.getvalue()
 
