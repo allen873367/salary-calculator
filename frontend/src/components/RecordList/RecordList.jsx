@@ -23,6 +23,15 @@ function smartTime(raw) {
   return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
 }
 
+function autoHours(start, end) {
+  if (!start || !end) return null;
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  let s = sh * 60 + sm, e = eh * 60 + em;
+  if (e <= s) e += 1440;
+  return Math.round((e - s) / 6) / 10;
+}
+
 const RATE_OPTIONS = [
   { value: '1.0', label: '1.0x — 一般平日' },
   { value: '1.33', label: '1.33x — 平日延長工時前 2h' },
@@ -217,14 +226,36 @@ export default function RecordList() {
                 <div className="form-group">
                   <label>上班</label>
                   <input type="text" inputMode="numeric" placeholder="09:00" value={editRecord.start_time}
-                    onChange={(e) => setEditRecord({...editRecord, start_time: e.target.value.replace(/[^0-9]/g, '').slice(0, 4)})}
-                    onBlur={(e) => setEditRecord({...editRecord, start_time: smartTime(e.target.value)})} />
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+                      setEditRecord((prev) => ({...prev, start_time: val}));
+                    }}
+                    onBlur={(e) => {
+                      const start = smartTime(e.target.value);
+                      setEditRecord((prev) => {
+                        const next = {...prev, start_time: start};
+                        const h = autoHours(start, next.end_time);
+                        if (h !== null) next.hours = h;
+                        return next;
+                      });
+                    }} />
                 </div>
                 <div className="form-group">
                   <label>下班</label>
                   <input type="text" inputMode="numeric" placeholder="18:00" value={editRecord.end_time}
-                    onChange={(e) => setEditRecord({...editRecord, end_time: e.target.value.replace(/[^0-9]/g, '').slice(0, 4)})}
-                    onBlur={(e) => setEditRecord({...editRecord, end_time: smartTime(e.target.value)})} />
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+                      setEditRecord((prev) => ({...prev, end_time: val}));
+                    }}
+                    onBlur={(e) => {
+                      const end = smartTime(e.target.value);
+                      setEditRecord((prev) => {
+                        const next = {...prev, end_time: end};
+                        const h = autoHours(next.start_time, end);
+                        if (h !== null) next.hours = h;
+                        return next;
+                      });
+                    }} />
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
