@@ -15,6 +15,6 @@ class RecordSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'store', 'store_name', 'date', 'start_time', 'end_time',
             'hours', 'hourly_wage', 'rate_multiplier',
-            'overtime_hours', 'overtime_rate', 'notes',
+            'overtime_hours', 'overtime_rate', 'subsidy', 'notes',
             'total_pay', 'created_at', 'updated_at',
         )

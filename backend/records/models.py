@@ -22,6 +22,7 @@ class WorkRecord(models.Model):
     rate_multiplier = models.DecimalField(max_digits=3, decimal_places=1, default=1.0)
     overtime_hours = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     overtime_rate = models.DecimalField(max_digits=3, decimal_places=2, default=1.33)
+    subsidy = models.PositiveIntegerField(default=0, verbose_name='津貼')
     notes = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -29,7 +30,7 @@ class WorkRecord(models.Model):
     def total_pay(self):
         base = float(self.hours) * float(self.hourly_wage) * float(self.rate_multiplier)
         overtime = float(self.overtime_hours) * float(self.hourly_wage) * float(self.overtime_rate)
-        return round(base + overtime)
+        return round(base + overtime + self.subsidy)
 
     class Meta:
         ordering = ['-date', '-created_at']

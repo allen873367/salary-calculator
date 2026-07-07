@@ -47,7 +47,7 @@ export default function RecordForm({ onSaved }) {
     store: '', date: new Date().toISOString().slice(0, 10),
     start_time: '', end_time: '', hours: '',
     hourly_wage: 196, rate_multiplier: '1.0',
-    overtime_hours: 0, overtime_rate: 1.33, notes: '',
+    overtime_hours: 0, overtime_rate: 1.33, subsidy: 0, notes: '',
   });
   const [newStore, setNewStore] = useState('');
 
@@ -97,11 +97,12 @@ export default function RecordForm({ onSaved }) {
         rate_multiplier: form.rate_multiplier,
         overtime_hours: Number(form.overtime_hours) || 0,
         overtime_rate: Number(form.overtime_rate) || 1.33,
+        subsidy: Number(form.subsidy) || 0,
         notes: form.notes,
       });
       setForm((f) => ({
         ...f, store: '', start_time: '', end_time: '', hours: '',
-        overtime_hours: 0, notes: '',
+        overtime_hours: 0, subsidy: 0, notes: '',
       }));
       onSaved?.();
     } catch (err) {
@@ -193,6 +194,11 @@ export default function RecordForm({ onSaved }) {
                   <option value="1.0">1.0 倍（無加班費）</option>
                 </select>
               </div>
+              <div className="form-group">
+                <label>津貼 <span className="hint">(元)</span></label>
+                <input type="number" step="1" min="0" value={form.subsidy}
+                  onChange={(e) => update('subsidy', e.target.value)} placeholder="車馬費、誤餐費" />
+              </div>
               <div className="form-group full">
                 <label>備註</label>
                 <textarea rows="1" value={form.notes}
@@ -204,7 +210,7 @@ export default function RecordForm({ onSaved }) {
               <button type="submit" className="btn btn-primary">儲存記錄</button>
               <button type="button" className="btn btn-outline" onClick={() => setForm((f) => ({
                 ...f, store: '', start_time: '', end_time: '', hours: '',
-                overtime_hours: 0, notes: '',
+                overtime_hours: 0, subsidy: 0, notes: '',
               }))}>清除</button>
             </div>
           </div>
@@ -216,6 +222,7 @@ export default function RecordForm({ onSaved }) {
               multiplier={form.rate_multiplier}
               otHours={form.overtime_hours}
               otRate={form.overtime_rate}
+              subsidy={form.subsidy}
             />
           </div>
         </div>

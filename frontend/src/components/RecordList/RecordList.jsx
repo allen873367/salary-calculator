@@ -92,6 +92,7 @@ export default function RecordList() {
         rate_multiplier: editRecord.rate_multiplier,
         overtime_hours: Number(editRecord.overtime_hours) || 0,
         overtime_rate: Number(editRecord.overtime_rate) || 1.33,
+        subsidy: Number(editRecord.subsidy) || 0,
         notes: editRecord.notes,
       });
       setEditRecord(null);
@@ -145,6 +146,7 @@ export default function RecordList() {
               <tr>
                 <th>日期</th><th>店家</th><th>時薪</th><th>工時</th>
                 <th style={{ textAlign: 'right' }}>本薪</th>
+                <th style={{ textAlign: 'right' }}>津貼</th>
                 <th style={{ textAlign: 'right' }}>合計</th>
                 <th style={{ textAlign: 'center' }}>操作</th>
               </tr>
@@ -164,6 +166,9 @@ export default function RecordList() {
                   <td style={{ textAlign: 'right' }} className="text-money">
                     ${Math.round(Number(r.hours) * Number(r.hourly_wage) * Number(r.rate_multiplier)).toLocaleString()}
                   </td>
+                  <td style={{ textAlign: 'right', color: 'var(--success)' }}>
+                    {Number(r.subsidy) > 0 ? `+$${Number(r.subsidy).toLocaleString()}` : '-'}
+                  </td>
                   <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--accent)' }}>
                     ${r.total_pay?.toLocaleString() || '0'}
                   </td>
@@ -175,6 +180,7 @@ export default function RecordList() {
                       rate_multiplier: r.rate_multiplier,
                       overtime_hours: r.overtime_hours || 0,
                       overtime_rate: r.overtime_rate,
+                      subsidy: r.subsidy || 0,
                       notes: r.notes || '',
                     })} title="編輯">編輯</button>
                     <button className="action-btn" onClick={() => handleDelete(r.id)} title="刪除">刪除</button>
@@ -284,6 +290,24 @@ export default function RecordList() {
                   <label>加班時數</label>
                   <input type="number" step="0.5" min="0" value={editRecord.overtime_hours}
                     onChange={(e) => setEditRecord({...editRecord, overtime_hours: e.target.value})} />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div className="form-group">
+                  <label>加班費率</label>
+                  <select value={editRecord.overtime_rate}
+                    onChange={(e) => setEditRecord({...editRecord, overtime_rate: e.target.value})}>
+                    <option value="1.33">1.33 倍</option>
+                    <option value="1.66">1.66 倍</option>
+                    <option value="2.0">2.0 倍</option>
+                    <option value="1.0">1.0 倍</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>津貼</label>
+                  <input type="number" step="1" min="0" value={editRecord.subsidy}
+                    onChange={(e) => setEditRecord({...editRecord, subsidy: e.target.value})}
+                    placeholder="車馬費" />
                 </div>
               </div>
               <div className="form-group">
