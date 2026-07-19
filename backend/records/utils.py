@@ -6,7 +6,7 @@ def generate_csv(records):
     output = io.StringIO()
     output.write('﻿')  # BOM for Excel
     writer = csv.writer(output)
-    writer.writerow(['日期', '店家', '時薪', '薪資倍率', '工時', '本薪', '津貼', '合計', '備註'])
+    writer.writerow(['日期', '上班', '下班', '店家', '時薪', '薪資倍率', '工時', '本薪', '津貼', '合計', '備註'])
 
     from collections import defaultdict
     month_totals = defaultdict(int)
@@ -16,7 +16,10 @@ def generate_csv(records):
         base_pay = round(float(r.hours) * float(r.hourly_wage) * float(r.rate_multiplier))
         month_totals[r.date.strftime('%Y-%m')] += pay
         writer.writerow([
-            r.date, r.store.name if r.store else '', r.hourly_wage,
+            r.date,
+            str(r.start_time)[:5] if r.start_time else '',
+            str(r.end_time)[:5] if r.end_time else '',
+            r.store.name if r.store else '', r.hourly_wage,
             r.rate_multiplier, r.hours, base_pay, r.subsidy, pay, r.notes
         ])
 
