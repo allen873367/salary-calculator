@@ -163,7 +163,7 @@ export default function RecordList() {
                   </td>
                   <td><span className="text-store">{r.store_name || '(未指定)'}</span></td>
                   <td>${r.hourly_wage}</td>
-                  <td>{r.hours}h</td>
+                  <td>{Number(r.hours)}h</td>
                   <td style={{ textAlign: 'right' }} className="text-money">
                     ${Math.round(Number(r.hours) * Number(r.hourly_wage) * Number(r.rate_multiplier)).toLocaleString()}
                   </td>
