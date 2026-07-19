@@ -17,7 +17,7 @@ class WorkRecord(models.Model):
     date = models.DateField()
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
-    hours = models.DecimalField(max_digits=5, decimal_places=1)
+    hours = models.DecimalField(max_digits=6, decimal_places=2)
     hourly_wage = models.PositiveIntegerField(default=196)
     rate_multiplier = models.DecimalField(max_digits=3, decimal_places=1, default=1.0)
     overtime_hours = models.DecimalField(max_digits=4, decimal_places=1, default=0)

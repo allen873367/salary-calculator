@@ -38,7 +38,8 @@ function autoHours(start, end) {
   const [eh, em] = end.split(':').map(Number);
   let s = sh * 60 + sm, e = eh * 60 + em;
   if (e <= s) e += 1440;
-  return Math.round((e - s) / 6) / 10;
+  const minutes = e - s;
+  return Math.round(minutes * 100 / 60) / 100;
 }
 
 export default function RecordForm({ onSaved }) {
@@ -164,7 +165,7 @@ export default function RecordForm({ onSaved }) {
               </div>
               <div className="form-group">
                 <label>總工時 <span className="hint">(時)</span></label>
-                <input type="number" step="0.5" min="0" value={form.hours}
+                <input type="number" step="0.01" min="0" value={form.hours}
                   onChange={(e) => update('hours', e.target.value)} placeholder="自動計算" />
               </div>
               <div className="form-group">

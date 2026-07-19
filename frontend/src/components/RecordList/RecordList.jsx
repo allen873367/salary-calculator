@@ -29,7 +29,8 @@ function autoHours(start, end) {
   const [eh, em] = end.split(':').map(Number);
   let s = sh * 60 + sm, e = eh * 60 + em;
   if (e <= s) e += 1440;
-  return Math.round((e - s) / 6) / 10;
+  const minutes = e - s;
+  return Math.round(minutes * 100 / 60) / 100;
 }
 
 const RATE_OPTIONS = [
@@ -267,7 +268,7 @@ export default function RecordList() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 <div className="form-group">
                   <label>工時</label>
-                  <input type="number" step="0.5" min="0" value={editRecord.hours}
+                  <input type="number" step="0.01" min="0" value={editRecord.hours}
                     onChange={(e) => setEditRecord({...editRecord, hours: e.target.value})} />
                 </div>
                 <div className="form-group">
