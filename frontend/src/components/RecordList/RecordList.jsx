@@ -157,10 +157,8 @@ export default function RecordList() {
               </tr>
             </thead>
             <tbody>
-              {records.map((r) => {
-                const isHoliday = Number(r.rate_multiplier) >= 2.0;
-                return (
-                <tr key={r.id} className={isHoliday ? 'holiday-row' : ''}>
+              {records.map((r) => (
+                <tr key={r.id}>
                   <td style={{ whiteSpace: 'nowrap' }}>
                     <span>{r.date.replace(/-/g, '/')}</span>
                     {r.start_time ? <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
@@ -199,8 +197,7 @@ export default function RecordList() {
                     <button className="action-btn" onClick={() => handleDelete(r.id)} title="刪除">刪除</button>
                   </td>
                 </tr>
-                );
-              })}
+              ))}
             </tbody>
           </table>
         </div>
