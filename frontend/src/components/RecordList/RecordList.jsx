@@ -112,7 +112,7 @@ export default function RecordList() {
       const url = URL.createObjectURL(new Blob([res.data]));
       const a = document.createElement('a');
       a.href = url;
-      a.download = `打工薪資報表_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `打工薪資報表_${new Date().toISOString().slice(0, 10)}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);
     } catch { alert('匯出失敗'); }
@@ -135,7 +135,7 @@ export default function RecordList() {
           })}
         </select>
         <button className="btn btn-sm btn-outline" onClick={load}>重新整理</button>
-        <button className="btn btn-sm btn-primary" onClick={exportCSV}>匯出 CSV</button>
+        <button className="btn btn-sm btn-primary" onClick={exportCSV}>匯出 Excel</button>
         <button className="btn btn-sm btn-outline" onClick={() => window.print()}>列印</button>
       </div>
 

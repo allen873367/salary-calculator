@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from .models import Store, WorkRecord
 from .serializers import StoreSerializer, RecordSerializer
-from .utils import generate_csv, generate_backup
+from .utils import OPENPYXL_AVAILABLE, generate_csv, generate_xlsx, generate_backup
 
 # ── Stores ──
 
@@ -97,6 +97,15 @@ def export_csv_view(request):
         qs = qs.filter(date__startswith=month)
     if store:
         qs = qs.filter(store_id=store)
+    if OPENPYXL_AVAILABLE:
+        xlsx = generate_xlsx(qs)
+        response = HttpResponse(
+            xlsx.read(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = 'attachment; filename="salary_report.xlsx"'
+        return response
+    # 若未裝 openpyxl，退回 CSV
     csv_content = generate_csv(qs)
     response = HttpResponse(csv_content, content_type='text/csv; charset=utf-8-sig')
     response['Content-Disposition'] = 'attachment; filename="salary_report.csv"'

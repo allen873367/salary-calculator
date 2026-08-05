@@ -9,7 +9,7 @@ const exportCSV = async (month) => {
     const url = URL.createObjectURL(new Blob([res.data]));
     const a = document.createElement('a');
     a.href = url;
-    a.download = `打工薪資報表${month ? '_' + month : ''}_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `打工薪資報表${month ? '_' + month : ''}_${new Date().toISOString().slice(0, 10)}.xlsx`;
     a.click();
     URL.revokeObjectURL(url);
   } catch { alert('匯出失敗'); }
@@ -67,7 +67,7 @@ export default function StatsView() {
         </select>
         <button className="btn btn-sm btn-outline" onClick={() => load(filterMonth)}>重新整理</button>
         <button className="btn btn-sm btn-primary" onClick={() => exportCSV(filterMonth)}>
-          {filterMonth ? `匯出 ${parseInt(filterMonth.split('-')[1])} 月 CSV` : '匯出 CSV'}
+          {filterMonth ? `匯出 ${parseInt(filterMonth.split('-')[1])} 月 Excel` : '匯出 Excel'}
         </button>
         <button className="btn btn-sm btn-outline" onClick={() => window.print()}>列印報表</button>
       </div>
