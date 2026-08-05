@@ -1,6 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../../utils/api';
 
+const exportCSV = async (month) => {
+  try {
+    const params = {};
+    if (month) params.month = month;
+    const res = await api.get('/export/csv/', { params, responseType: 'blob' });
+    const url = URL.createObjectURL(new Blob([res.data]));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `打工薪資報表${month ? '_' + month : ''}_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch { alert('匯出失敗'); }
+};
+
 export default function StatsView() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -52,6 +66,9 @@ export default function StatsView() {
           })}
         </select>
         <button className="btn btn-sm btn-outline" onClick={() => load(filterMonth)}>重新整理</button>
+        <button className="btn btn-sm btn-primary" onClick={() => exportCSV(filterMonth)}>
+          {filterMonth ? `匯出 ${parseInt(filterMonth.split('-')[1])} 月 CSV` : '匯出 CSV'}
+        </button>
         <button className="btn btn-sm btn-outline" onClick={() => window.print()}>列印報表</button>
       </div>
 

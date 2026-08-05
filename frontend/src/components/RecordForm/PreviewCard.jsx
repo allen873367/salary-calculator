@@ -6,7 +6,9 @@ export default function PreviewCard({ hours, wage, multiplier, otHours, otRate, 
   const or = Number(otRate) || 1.33;
   const s = Number(subsidy) || 0;
 
-  const base = Math.round(h * w * m);
+  // 加班重疊部分從上班時數扣掉；本薪不含加班倍率
+  const baseHours = Math.max(h - ot, 0);
+  const base = Math.round(baseHours * w * m);
   const overtime = Math.round(ot * w * or);
   const total = base + overtime + s;
 

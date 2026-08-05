@@ -6,21 +6,25 @@ def generate_csv(records):
     output = io.StringIO()
     output.write('﻿')  # BOM for Excel
     writer = csv.writer(output)
-    writer.writerow(['日期', '上班', '下班', '店家', '時薪', '薪資倍率', '工時', '本薪', '津貼', '合計', '備註'])
+    writer.writerow(['日期', '上班', '下班', '加班開始', '加班結束', '店家', '時薪', '薪資倍率', '上班時數', '加班時數', '本薪', '加班費', '津貼', '合計', '備註'])
 
     from collections import defaultdict
     month_totals = defaultdict(int)
 
     for r in records:
         pay = r.total_pay()
-        base_pay = round(float(r.hours) * float(r.hourly_wage) * float(r.rate_multiplier))
+        base_pay = round(float(r.base_hours) * float(r.hourly_wage) * float(r.rate_multiplier))
+        overtime_pay = round(float(r.overtime_hours) * float(r.hourly_wage) * float(r.overtime_rate))
         month_totals[r.date.strftime('%Y-%m')] += pay
         writer.writerow([
             r.date,
             str(r.start_time)[:5] if r.start_time else '',
             str(r.end_time)[:5] if r.end_time else '',
+            str(r.overtime_start)[:5] if r.overtime_start else '',
+            str(r.overtime_end)[:5] if r.overtime_end else '',
             r.store.name if r.store else '', r.hourly_wage,
-            r.rate_multiplier, r.hours, base_pay, r.subsidy, pay, r.notes
+            r.rate_multiplier, r.base_hours, r.overtime_hours,
+            base_pay, overtime_pay, r.subsidy, pay, r.notes
         ])
 
     # Monthly summary rows
@@ -43,8 +47,11 @@ def generate_backup(records):
             'hours': str(r.hours),
             'hourly_wage': r.hourly_wage,
             'rate_multiplier': str(r.rate_multiplier),
+            'overtime_start': str(r.overtime_start) if r.overtime_start else '',
+            'overtime_end': str(r.overtime_end) if r.overtime_end else '',
             'overtime_hours': str(r.overtime_hours),
             'overtime_rate': str(r.overtime_rate),
+            'subsidy': r.subsidy,
             'notes': r.notes,
         })
     return data

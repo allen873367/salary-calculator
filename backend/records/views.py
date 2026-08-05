@@ -90,8 +90,14 @@ def stats_view(request):
 
 @api_view(['GET'])
 def export_csv_view(request):
-    records = WorkRecord.objects.filter(user=request.user).select_related('store').order_by('date')
-    csv_content = generate_csv(records)
+    qs = WorkRecord.objects.filter(user=request.user).select_related('store').order_by('date')
+    month = request.query_params.get('month')
+    store = request.query_params.get('store')
+    if month:
+        qs = qs.filter(date__startswith=month)
+    if store:
+        qs = qs.filter(store_id=store)
+    csv_content = generate_csv(qs)
     response = HttpResponse(csv_content, content_type='text/csv; charset=utf-8-sig')
     response['Content-Disposition'] = 'attachment; filename="salary_report.csv"'
     return response
@@ -130,6 +136,8 @@ def backup_import_view(request):
                 hours=Decimal(str(item['hours'])),
                 hourly_wage=int(item.get('hourly_wage', 196)),
                 rate_multiplier=Decimal(str(item.get('rate_multiplier', 1.0))),
+                overtime_start=item.get('overtime_start') or None,
+                overtime_end=item.get('overtime_end') or None,
                 overtime_hours=Decimal(str(item.get('overtime_hours', 0))),
                 overtime_rate=Decimal(str(item.get('overtime_rate', 1.33))),
                 notes=item.get('notes', ''),

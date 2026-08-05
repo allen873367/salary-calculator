@@ -20,7 +20,9 @@ class WorkRecord(models.Model):
     hours = models.DecimalField(max_digits=6, decimal_places=2)
     hourly_wage = models.PositiveIntegerField(default=196)
     rate_multiplier = models.DecimalField(max_digits=3, decimal_places=1, default=1.0)
-    overtime_hours = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    overtime_start = models.TimeField(null=True, blank=True)
+    overtime_end = models.TimeField(null=True, blank=True)
+    overtime_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     overtime_rate = models.DecimalField(max_digits=3, decimal_places=2, default=1.33)
     subsidy = models.PositiveIntegerField(default=0, verbose_name='津貼')
     notes = models.TextField(blank=True, default='')
@@ -28,9 +30,15 @@ class WorkRecord(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def total_pay(self):
-        base = float(self.hours) * float(self.hourly_wage) * float(self.rate_multiplier)
+        # 本薪不含加班倍率；加班重疊部分從上班時數扣掉
+        base_hours = max(float(self.hours) - float(self.overtime_hours), 0)
+        base = base_hours * float(self.hourly_wage) * float(self.rate_multiplier)
         overtime = float(self.overtime_hours) * float(self.hourly_wage) * float(self.overtime_rate)
         return round(base + overtime + self.subsidy)
+
+    @property
+    def base_hours(self):
+        return max(float(self.hours) - float(self.overtime_hours), 0)
 
     class Meta:
         ordering = ['-date', '-created_at']

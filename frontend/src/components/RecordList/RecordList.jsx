@@ -1,26 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../../utils/api';
 
-function smartTime(raw) {
-  if (!raw) return '';
-  let digits = raw.replace(/[^0-9]/g, '').slice(0, 4);
-  if (!digits) return '';
-  if (digits.length === 1) return '0' + digits + ':00';
-  if (digits.length === 2) {
-    let h = parseInt(digits);
-    if (h > 23) return '23:59';
-    return digits + ':00';
-  }
-  if (digits.length === 3) {
-    let h = parseInt(digits[0]), m = parseInt(digits.slice(1));
-    if (h > 23) h = 23;
-    if (m > 59) m = 59;
-    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
-  }
-  let h = parseInt(digits.slice(0, 2)), m = parseInt(digits.slice(2));
+function parseTime(digits) {
+  // 24:00 == 午夜 → 00:00
+  if (digits === '24' || digits === '2400') return '00:00';
+  let h, m;
+  if (digits.length === 2) { h = parseInt(digits); m = 0; }
+  else if (digits.length === 3) { h = parseInt(digits[0]); m = parseInt(digits.slice(1)); }
+  else { h = parseInt(digits.slice(0, 2)); m = parseInt(digits.slice(2)); }
   if (h > 23) h = 23;
   if (m > 59) m = 59;
   return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+}
+
+function smartTime(raw) {
+  if (!raw) return '';
+  const digits = raw.replace(/[^0-9]/g, '').slice(0, 4);
+  if (!digits) return '';
+  if (digits.length === 1) return '0' + digits + ':00';
+  return parseTime(digits);
 }
 
 function autoHours(start, end) {
@@ -91,6 +89,8 @@ export default function RecordList() {
         hours: editRecord.hours,
         hourly_wage: Number(editRecord.hourly_wage),
         rate_multiplier: editRecord.rate_multiplier,
+        overtime_start: editRecord.overtime_start || null,
+        overtime_end: editRecord.overtime_end || null,
         overtime_hours: Number(editRecord.overtime_hours) || 0,
         overtime_rate: Number(editRecord.overtime_rate) || 1.33,
         subsidy: Number(editRecord.subsidy) || 0,
@@ -105,7 +105,10 @@ export default function RecordList() {
 
   const exportCSV = async () => {
     try {
-      const res = await api.get('/export/csv/', { responseType: 'blob' });
+      const params = {};
+      if (filterMonth) params.month = filterMonth;
+      if (filterStore) params.store = filterStore;
+      const res = await api.get('/export/csv/', { params, responseType: 'blob' });
       const url = URL.createObjectURL(new Blob([res.data]));
       const a = document.createElement('a');
       a.href = url;
@@ -147,25 +150,32 @@ export default function RecordList() {
               <tr>
                 <th>日期</th><th>店家</th><th>時薪</th><th>工時</th>
                 <th style={{ textAlign: 'right' }}>本薪</th>
+                <th style={{ textAlign: 'right' }}>加班費</th>
                 <th style={{ textAlign: 'right' }}>津貼</th>
                 <th style={{ textAlign: 'right' }}>合計</th>
                 <th style={{ textAlign: 'center' }}>操作</th>
               </tr>
             </thead>
             <tbody>
-              {records.map((r) => (
-                <tr key={r.id}>
+              {records.map((r) => {
+                const isHoliday = Number(r.rate_multiplier) >= 2.0;
+                return (
+                <tr key={r.id} className={isHoliday ? 'holiday-row' : ''}>
                   <td style={{ whiteSpace: 'nowrap' }}>
                     <span>{r.date.replace(/-/g, '/')}</span>
                     {r.start_time ? <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
                       <br/>{r.start_time}-{r.end_time}
+                      {r.overtime_start ? <span style={{ color: 'var(--warning)' }}><br/>加班 {r.overtime_start}-{r.overtime_end}</span> : null}
                     </span> : null}
                   </td>
                   <td><span className="text-store">{r.store_name || '(未指定)'}</span></td>
                   <td>${r.hourly_wage}</td>
-                  <td>{Number(r.hours)}h</td>
+                  <td>{Number(r.hours)}h{Number(r.overtime_hours) > 0 ? <span style={{ fontSize: '0.75rem', color: 'var(--warning)' }}> (+{Number(r.overtime_hours)})</span> : null}</td>
                   <td style={{ textAlign: 'right' }} className="text-money">
-                    ${Math.round(Number(r.hours) * Number(r.hourly_wage) * Number(r.rate_multiplier)).toLocaleString()}
+                    ${Math.round(Number(r.base_hours ?? (Number(r.hours) - Number(r.overtime_hours))) * Number(r.hourly_wage) * Number(r.rate_multiplier)).toLocaleString()}
+                  </td>
+                  <td style={{ textAlign: 'right', color: 'var(--warning)' }}>
+                    {Number(r.overtime_hours) > 0 ? `+$${Math.round(Number(r.overtime_hours) * Number(r.hourly_wage) * Number(r.overtime_rate)).toLocaleString()}` : '-'}
                   </td>
                   <td style={{ textAlign: 'right', color: 'var(--success)' }}>
                     {Number(r.subsidy) > 0 ? `+$${Number(r.subsidy).toLocaleString()}` : '-'}
@@ -179,6 +189,8 @@ export default function RecordList() {
                       start_time: r.start_time || '', end_time: r.end_time || '',
                       hours: r.hours, hourly_wage: r.hourly_wage,
                       rate_multiplier: r.rate_multiplier,
+                      overtime_start: r.overtime_start || '',
+                      overtime_end: r.overtime_end || '',
                       overtime_hours: r.overtime_hours || 0,
                       overtime_rate: r.overtime_rate,
                       subsidy: r.subsidy || 0,
@@ -187,7 +199,8 @@ export default function RecordList() {
                     <button className="action-btn" onClick={() => handleDelete(r.id)} title="刪除">刪除</button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -288,8 +301,42 @@ export default function RecordList() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>加班時數</label>
-                  <input type="number" step="0.5" min="0" value={editRecord.overtime_hours}
+                  <label>加班開始 <span className="hint">(24h)</span></label>
+                  <input type="text" inputMode="numeric" placeholder="17:00" value={editRecord.overtime_start}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+                      setEditRecord((prev) => ({...prev, overtime_start: val}));
+                    }}
+                    onBlur={(e) => {
+                      const otStart = smartTime(e.target.value);
+                      setEditRecord((prev) => {
+                        const next = {...prev, overtime_start: otStart};
+                        const ot = autoHours(otStart, next.overtime_end);
+                        if (ot !== null) next.overtime_hours = ot;
+                        return next;
+                      });
+                    }} />
+                </div>
+                <div className="form-group">
+                  <label>加班結束 <span className="hint">(24h)</span></label>
+                  <input type="text" inputMode="numeric" placeholder="19:00" value={editRecord.overtime_end}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+                      setEditRecord((prev) => ({...prev, overtime_end: val}));
+                    }}
+                    onBlur={(e) => {
+                      const otEnd = smartTime(e.target.value);
+                      setEditRecord((prev) => {
+                        const next = {...prev, overtime_end: otEnd};
+                        const ot = autoHours(next.overtime_start, otEnd);
+                        if (ot !== null) next.overtime_hours = ot;
+                        return next;
+                      });
+                    }} />
+                </div>
+                <div className="form-group">
+                  <label>加班時數 <span className="hint">(自動)</span></label>
+                  <input type="number" step="0.01" min="0" value={editRecord.overtime_hours}
                     onChange={(e) => setEditRecord({...editRecord, overtime_hours: e.target.value})} />
                 </div>
               </div>

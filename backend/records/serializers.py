@@ -9,12 +9,13 @@ class StoreSerializer(serializers.ModelSerializer):
 class RecordSerializer(serializers.ModelSerializer):
     store_name = serializers.CharField(source='store.name', read_only=True)
     total_pay = serializers.IntegerField(read_only=True)
+    base_hours = serializers.DecimalField(read_only=True, max_digits=6, decimal_places=2)
 
     class Meta:
         model = WorkRecord
         fields = (
             'id', 'store', 'store_name', 'date', 'start_time', 'end_time',
             'hours', 'hourly_wage', 'rate_multiplier',
-            'overtime_hours', 'overtime_rate', 'subsidy', 'notes',
-            'total_pay', 'created_at', 'updated_at',
+            'overtime_start', 'overtime_end', 'overtime_hours', 'overtime_rate', 'subsidy', 'notes',
+            'total_pay', 'base_hours', 'created_at', 'updated_at',
         )

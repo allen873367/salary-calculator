@@ -10,26 +10,24 @@ const RATE_OPTIONS = [
   { value: '2.66', label: '2.66x — 休息日出勤' },
 ];
 
-function smartTime(raw) {
-  if (!raw) return '';
-  let digits = raw.replace(/[^0-9]/g, '').slice(0, 4);
-  if (!digits) return '';
-  if (digits.length === 1) return '0' + digits + ':00';
-  if (digits.length === 2) {
-    let h = parseInt(digits);
-    if (h > 23) return '23:59';
-    return digits + ':00';
-  }
-  if (digits.length === 3) {
-    let h = parseInt(digits[0]), m = parseInt(digits.slice(1));
-    if (h > 23) h = 23;
-    if (m > 59) m = 59;
-    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
-  }
-  let h = parseInt(digits.slice(0, 2)), m = parseInt(digits.slice(2));
+function parseTime(digits) {
+  // 24:00 == 午夜 → 00:00
+  if (digits === '24' || digits === '2400') return '00:00';
+  let h, m;
+  if (digits.length === 2) { h = parseInt(digits); m = 0; }
+  else if (digits.length === 3) { h = parseInt(digits[0]); m = parseInt(digits.slice(1)); }
+  else { h = parseInt(digits.slice(0, 2)); m = parseInt(digits.slice(2)); }
   if (h > 23) h = 23;
   if (m > 59) m = 59;
   return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+}
+
+function smartTime(raw) {
+  if (!raw) return '';
+  const digits = raw.replace(/[^0-9]/g, '').slice(0, 4);
+  if (!digits) return '';
+  if (digits.length === 1) return '0' + digits + ':00';
+  return parseTime(digits);
 }
 
 function autoHours(start, end) {
@@ -48,7 +46,8 @@ export default function RecordForm({ onSaved }) {
     store: '', date: new Date().toISOString().slice(0, 10),
     start_time: '', end_time: '', hours: '',
     hourly_wage: 196, rate_multiplier: '1.0',
-    overtime_hours: 0, overtime_rate: 1.33, subsidy: 0, notes: '',
+    overtime_start: '', overtime_end: '', overtime_hours: 0,
+    overtime_rate: 1.33, subsidy: 0, notes: '',
   });
   const [newStore, setNewStore] = useState('');
 
@@ -67,6 +66,17 @@ export default function RecordForm({ onSaved }) {
       if (field === 'end_time') next.end_time = value;
       const h = autoHours(next.start_time, next.end_time);
       if (h !== null) next.hours = h;
+      return next;
+    });
+  }, []);
+
+  const onOTimeChange = useCallback((field, value) => {
+    setForm((f) => {
+      const next = { ...f, [field]: value };
+      if (field === 'overtime_start') next.overtime_start = value;
+      if (field === 'overtime_end') next.overtime_end = value;
+      const ot = autoHours(next.overtime_start, next.overtime_end);
+      next.overtime_hours = ot !== null ? ot : 0;
       return next;
     });
   }, []);
@@ -96,6 +106,8 @@ export default function RecordForm({ onSaved }) {
         start_time: form.start_time || null, end_time: form.end_time || null,
         hours: form.hours, hourly_wage: Number(form.hourly_wage),
         rate_multiplier: form.rate_multiplier,
+        overtime_start: form.overtime_start || null,
+        overtime_end: form.overtime_end || null,
         overtime_hours: Number(form.overtime_hours) || 0,
         overtime_rate: Number(form.overtime_rate) || 1.33,
         subsidy: Number(form.subsidy) || 0,
@@ -103,7 +115,7 @@ export default function RecordForm({ onSaved }) {
       });
       setForm((f) => ({
         ...f, store: '', start_time: '', end_time: '', hours: '',
-        overtime_hours: 0, subsidy: 0, notes: '',
+        overtime_start: '', overtime_end: '', overtime_hours: 0, subsidy: 0, notes: '',
       }));
       onSaved?.();
     } catch (err) {
@@ -182,8 +194,26 @@ export default function RecordForm({ onSaved }) {
                 </select>
               </div>
               <div className="form-group">
-                <label>加班時數 <span className="hint">(時)</span></label>
-                <input type="number" step="0.5" min="0" value={form.overtime_hours}
+                <label>加班開始 <span className="hint">(24h)</span></label>
+                <input
+                  type="text" placeholder="17:00" inputMode="numeric"
+                  value={form.overtime_start}
+                  onChange={(e) => onOTimeChange('overtime_start', e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                  onBlur={(e) => onOTimeChange('overtime_start', smartTime(e.target.value))}
+                />
+              </div>
+              <div className="form-group">
+                <label>加班結束 <span className="hint">(24h)</span></label>
+                <input
+                  type="text" placeholder="18:00" inputMode="numeric"
+                  value={form.overtime_end}
+                  onChange={(e) => onOTimeChange('overtime_end', e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                  onBlur={(e) => onOTimeChange('overtime_end', smartTime(e.target.value))}
+                />
+              </div>
+              <div className="form-group">
+                <label>加班時數 <span className="hint">(自動)</span></label>
+                <input type="number" step="0.01" min="0" value={form.overtime_hours}
                   onChange={(e) => update('overtime_hours', e.target.value)} />
               </div>
               <div className="form-group">
@@ -211,7 +241,7 @@ export default function RecordForm({ onSaved }) {
               <button type="submit" className="btn btn-primary">儲存記錄</button>
               <button type="button" className="btn btn-outline" onClick={() => setForm((f) => ({
                 ...f, store: '', start_time: '', end_time: '', hours: '',
-                overtime_hours: 0, subsidy: 0, notes: '',
+                overtime_start: '', overtime_end: '', overtime_hours: 0, subsidy: 0, notes: '',
               }))}>清除</button>
             </div>
           </div>
