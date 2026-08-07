@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../../utils/api';
 import PreviewCard from './PreviewCard';
+import { defaultWage } from '../Settings/SettingsView.jsx';
 
 const RATE_OPTIONS = [
   { value: '1.0', label: '1.0x — 一般平日' },
@@ -45,7 +46,7 @@ export default function RecordForm({ onSaved }) {
   const [form, setForm] = useState({
     store: '', date: new Date().toISOString().slice(0, 10),
     start_time: '', end_time: '', hours: '',
-    hourly_wage: 196, rate_multiplier: '1.0',
+    hourly_wage: defaultWage(), rate_multiplier: '1.0',
     overtime_start: '', overtime_end: '', overtime_hours: 0,
     overtime_rate: 1.33, subsidy: 0, notes: '',
   });

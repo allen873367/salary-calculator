@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import api from '../../utils/api';
 
+export const defaultWage = () => Number(localStorage.getItem('default_hourly_wage')) || 196;
+export const setDefaultWage = (v) => {
+  const n = Number(v) || 0;
+  if (n > 0) localStorage.setItem('default_hourly_wage', String(n));
+  else localStorage.removeItem('default_hourly_wage');
+  return n;
+};
+
 export default function SettingsView() {
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,6 +95,26 @@ export default function SettingsView() {
 
   return (
     <>
+      {/* Default Wage */}
+      <section className="card">
+        <div className="card-title">預設時薪</div>
+        <div style={{ maxWidth: 400 }}>
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: 8 }}>
+            填一次，之後新增打工的時薪欄會自動帶入，不用每次重打。
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="number"
+              min="0"
+              defaultValue={defaultWage()}
+              onBlur={(e) => setDefaultWage(e.target.value)}
+              style={{ width: 120, padding: '10px 12px', fontSize: '0.9rem' }}
+            />
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>元 / 時</span>
+          </div>
+        </div>
+      </section>
+
       {/* Store Management */}
       <section className="card">
         <div className="card-title">店家管理</div>
