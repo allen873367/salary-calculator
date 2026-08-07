@@ -98,20 +98,18 @@ export default function SettingsView() {
       {/* Default Wage */}
       <section className="card">
         <div className="card-title">預設時薪</div>
-        <div style={{ maxWidth: 400 }}>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: 8 }}>
-            填一次，之後新增打工的時薪欄會自動帶入，不用每次重打。
-          </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <input
-              type="number"
-              min="0"
-              defaultValue={defaultWage()}
-              onBlur={(e) => setDefaultWage(e.target.value)}
-              style={{ width: 120, padding: '10px 12px', fontSize: '0.9rem' }}
-            />
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>元 / 時</span>
-          </div>
+        <div className="form-group" style={{ maxWidth: 220 }}>
+          <label>預設時薪 <span className="hint">(元/時)</span></label>
+          <input
+            type="number"
+            min="0"
+            defaultValue={defaultWage()}
+            onBlur={(e) => setDefaultWage(e.target.value)}
+            placeholder="例如 200"
+          />
+          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.78rem' }}>
+            之後新增打工的時薪欄會自動帶入
+          </span>
         </div>
       </section>
 
