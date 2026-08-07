@@ -60,13 +60,21 @@ export default function RecordList() {
       ]);
       setRecords(rRes.data);
       setStores(sRes.data);
-      const mSet = new Set(rRes.data.map((r) => r.date.slice(0, 7)));
-      setMonths([...mSet].sort().reverse());
     } catch (err) { console.error(err); }
     setLoading(false);
   }, [filterStore, filterMonth]);
 
+  // 月份選單永遠從「全部紀錄」產生，避免篩選單月後其他月份從下拉消失
+  const loadMonths = useCallback(async () => {
+    try {
+      const res = await api.get('/records/');
+      const mSet = new Set(res.data.map((r) => r.date.slice(0, 7)));
+      setMonths([...mSet].sort().reverse());
+    } catch (err) { console.error(err); }
+  }, []);
+
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { loadMonths(); }, [loadMonths]);
 
   const handleDelete = async (id) => {
     if (!confirm('確定要刪除這筆記錄嗎？')) return;
