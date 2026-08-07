@@ -7,12 +7,13 @@ try:
     from openpyxl.styles import Alignment, Fill, Font, PatternFill
     from openpyxl.utils import get_column_letter
     OPENPYXL_AVAILABLE = True
+    # 螢光筆底色（雙倍薪：國定假日／颱風天）
+    HIGHLIGHT_FILL = PatternFill(start_color='FFFF00', end_color='FFFF00', fill_type='solid')
+    SUMMARY_FILL = PatternFill(start_color='E8F0FE', end_color='E8F0FE', fill_type='solid')
 except ImportError:
     OPENPYXL_AVAILABLE = False
-
-# 螢光筆底色（雙倍薪：國定假日／颱風天）
-HIGHLIGHT_FILL = PatternFill(start_color='FFFF00', end_color='FFFF00', fill_type='solid')
-SUMMARY_FILL = PatternFill(start_color='E8F0FE', end_color='E8F0FE', fill_type='solid')
+    HIGHLIGHT_FILL = None
+    SUMMARY_FILL = None
 
 def generate_xlsx(records):
     """產生 Excel (.xlsx)，雙倍薪 (rate_multiplier >= 2.0) 的列以螢光底色標示。"""
