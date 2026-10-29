@@ -102,6 +102,7 @@ export default function RecordList() {
         overtime_hours: Number(editRecord.overtime_hours) || 0,
         overtime_rate: Number(editRecord.overtime_rate) || 1.33,
         subsidy: Number(editRecord.subsidy) || 0,
+        insurance: Number(editRecord.insurance) || 0,
         notes: editRecord.notes,
       });
       setEditRecord(null);
@@ -160,7 +161,8 @@ export default function RecordList() {
                 <th style={{ textAlign: 'right' }}>本薪</th>
                 <th style={{ textAlign: 'right' }}>加班費</th>
                 <th style={{ textAlign: 'right' }}>津貼</th>
-                <th style={{ textAlign: 'right' }}>合計</th>
+                <th style={{ textAlign: 'right' }}>勞健保</th>
+                <th style={{ textAlign: 'right' }}>實領合計</th>
                 <th style={{ textAlign: 'center' }}>操作</th>
               </tr>
             </thead>
@@ -178,13 +180,16 @@ export default function RecordList() {
                   <td>${r.hourly_wage}</td>
                   <td>{Number(r.hours)}h{Number(r.overtime_hours) > 0 ? <span style={{ fontSize: '0.75rem', color: 'var(--warning)' }}> (+{Number(r.overtime_hours)})</span> : null}</td>
                   <td style={{ textAlign: 'right' }} className="text-money">
-                    ${Math.round(Number(r.base_hours ?? (Number(r.hours) - Number(r.overtime_hours))) * Number(r.hourly_wage) * Number(r.rate_multiplier)).toLocaleString()}
+                    ${Math.round(Number(r.hours) * Number(r.hourly_wage) * Number(r.rate_multiplier)).toLocaleString()}
                   </td>
                   <td style={{ textAlign: 'right', color: 'var(--warning)' }}>
                     {Number(r.overtime_hours) > 0 ? `+$${Math.round(Number(r.overtime_hours) * Number(r.hourly_wage) * Number(r.overtime_rate)).toLocaleString()}` : '-'}
                   </td>
                   <td style={{ textAlign: 'right', color: 'var(--success)' }}>
                     {Number(r.subsidy) > 0 ? `+$${Number(r.subsidy).toLocaleString()}` : '-'}
+                  </td>
+                  <td style={{ textAlign: 'right', color: 'var(--danger, #ef4444)' }}>
+                    {Number(r.insurance) > 0 ? `-$${Number(r.insurance).toLocaleString()}` : '-'}
                   </td>
                   <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--accent)' }}>
                     ${r.total_pay?.toLocaleString() || '0'}
@@ -200,6 +205,7 @@ export default function RecordList() {
                       overtime_hours: r.overtime_hours || 0,
                       overtime_rate: r.overtime_rate,
                       subsidy: r.subsidy || 0,
+                      insurance: r.insurance || 0,
                       notes: r.notes || '',
                     })} title="編輯">編輯</button>
                     <button className="action-btn" onClick={() => handleDelete(r.id)} title="刪除">刪除</button>
@@ -345,7 +351,7 @@ export default function RecordList() {
                     onChange={(e) => setEditRecord({...editRecord, overtime_hours: e.target.value})} />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
                 <div className="form-group">
                   <label>加班費率</label>
                   <select value={editRecord.overtime_rate}
@@ -361,6 +367,12 @@ export default function RecordList() {
                   <input type="number" step="1" min="0" value={editRecord.subsidy}
                     onChange={(e) => setEditRecord({...editRecord, subsidy: e.target.value})}
                     placeholder="車馬費" />
+                </div>
+                <div className="form-group">
+                  <label>勞健保</label>
+                  <input type="number" step="1" min="0" value={editRecord.insurance || 0}
+                    onChange={(e) => setEditRecord({...editRecord, insurance: e.target.value})}
+                    placeholder="自付額" />
                 </div>
               </div>
               <div className="form-group">

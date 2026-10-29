@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../../utils/api';
+import { defaultMonthlyInsurance } from '../Settings/SettingsView.jsx';
 
 const exportCSV = async (month) => {
   try {
@@ -74,20 +75,34 @@ export default function StatsView() {
 
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="s-label">總收入</div>
-          <div className="s-value accent">${stats.total_pay.toLocaleString()}</div>
+          <div className="s-label">實領總薪資</div>
+          <div className="s-value accent">
+            ${Math.max(stats.total_pay - (filterMonth ? defaultMonthlyInsurance() : (defaultMonthlyInsurance() * (months.length || 1))), 0).toLocaleString()}
+          </div>
+          {defaultMonthlyInsurance() > 0 && (
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4 }}>
+              已扣每月健保 ${filterMonth ? defaultMonthlyInsurance() : (defaultMonthlyInsurance() * (months.length || 1))}
+            </div>
+          )}
         </div>
         <div className="stat-card">
-          <div className="s-label">上班天數</div>
-          <div className="s-value">{stats.record_count}</div>
+          <div className="s-label">應發總薪資 (毛額)</div>
+          <div className="s-value" style={{ color: 'var(--success, #10b981)' }}>
+            ${(stats.gross_pay ?? stats.total_pay).toLocaleString()}
+          </div>
+          {stats.total_ot_pay > 0 && (
+            <div style={{ fontSize: '0.75rem', color: 'var(--warning, #eab308)', marginTop: 4 }}>
+              含加班費 +${stats.total_ot_pay.toLocaleString()}
+            </div>
+          )}
         </div>
         <div className="stat-card">
-          <div className="s-label">最高連續上班</div>
-          <div className="s-value" style={{ color: 'var(--accent)' }}>{stats.max_streak} 天</div>
+          <div className="s-label">總上班工時</div>
+          <div className="s-value warning">{stats.total_hours}h{stats.total_ot_hours > 0 ? ` (+${stats.total_ot_hours}h加班)` : ''}</div>
         </div>
         <div className="stat-card">
-          <div className="s-label">總工時</div>
-          <div className="s-value warning">{stats.total_hours}h</div>
+          <div className="s-label">上班天數 / 連續</div>
+          <div className="s-value">{stats.record_count} 天 <span style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>({stats.max_streak}連)</span></div>
         </div>
       </div>
 

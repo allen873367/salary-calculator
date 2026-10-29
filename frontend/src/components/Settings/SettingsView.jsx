@@ -1,18 +1,48 @@
 import { useState, useEffect } from 'react';
 import api from '../../utils/api';
 
-export const defaultWage = () => Number(localStorage.getItem('default_hourly_wage')) || 196;
+const getUKey = (k) => {
+  const u = localStorage.getItem('username');
+  return u ? `${k}_${u}` : k;
+};
+
+export const defaultWage = () => Number(localStorage.getItem(getUKey('default_hourly_wage'))) || 196;
 export const setDefaultWage = (v) => {
   const n = Number(v) || 0;
-  if (n > 0) localStorage.setItem('default_hourly_wage', String(n));
-  else localStorage.removeItem('default_hourly_wage');
+  if (n > 0) localStorage.setItem(getUKey('default_hourly_wage'), String(n));
+  else localStorage.removeItem(getUKey('default_hourly_wage'));
   return n;
+};
+
+export const defaultMonthlyInsurance = () => Number(localStorage.getItem(getUKey('default_monthly_insurance'))) || 0;
+export const setDefaultMonthlyInsurance = (v) => {
+  const n = Number(v) || 0;
+  if (n >= 0) localStorage.setItem(getUKey('default_monthly_insurance'), String(n));
+  else localStorage.removeItem(getUKey('default_monthly_insurance'));
+  return n;
+};
+
+export const defaultSchedule = () => {
+  try {
+    return JSON.parse(localStorage.getItem(getUKey('default_schedule_template')) || '{}');
+  } catch {
+    return {};
+  }
+};
+
+export const setDefaultSchedule = (obj) => {
+  if (obj) localStorage.setItem(getUKey('default_schedule_template'), JSON.stringify(obj));
+  else localStorage.removeItem(getUKey('default_schedule_template'));
 };
 
 export default function SettingsView() {
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
+
+  // 常用班表設定狀態
+  const [schedule, setSchedule] = useState(() => defaultSchedule());
+  const [scheduleSaved, setScheduleSaved] = useState(false);
 
   useEffect(() => {
     loadStores();
@@ -93,23 +123,115 @@ export default function SettingsView() {
     }
   };
 
+  const saveSchedule = () => {
+    setDefaultSchedule(schedule);
+    setScheduleSaved(true);
+    setTimeout(() => setScheduleSaved(false), 2000);
+  };
+
   return (
     <>
-      {/* Default Wage */}
+      {/* 薪資與勞健保偏好設定 */}
       <section className="card">
-        <div className="card-title">預設時薪</div>
-        <div className="form-group" style={{ maxWidth: 220 }}>
-          <label>預設時薪 <span className="hint">(元/時)</span></label>
-          <input
-            type="number"
-            min="0"
-            defaultValue={defaultWage()}
-            onBlur={(e) => setDefaultWage(e.target.value)}
-            placeholder="例如 200"
-          />
-          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.78rem' }}>
-            之後新增打工的時薪欄會自動帶入
-          </span>
+        <div className="card-title">薪資與勞健保設定</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20 }}>
+          <div className="form-group">
+            <label>預設時薪 <span className="hint">(元/時)</span></label>
+            <input
+              type="number"
+              min="0"
+              defaultValue={defaultWage()}
+              onBlur={(e) => setDefaultWage(e.target.value)}
+              placeholder="例如 196"
+            />
+            <span style={{ color: 'var(--text-tertiary)', fontSize: '0.78rem' }}>
+              新增記錄時自動帶入
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>每月勞健保自付額 <span className="hint">(元/月)</span></label>
+            <input
+              type="number"
+              min="0"
+              defaultValue={defaultMonthlyInsurance() || ''}
+              onBlur={(e) => setDefaultMonthlyInsurance(e.target.value)}
+              placeholder="例如 800"
+            />
+            <span style={{ color: 'var(--text-tertiary)', fontSize: '0.78rem' }}>
+              月統計報表中將自動計算扣除此費用後的實領薪資
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* 常用班表模板設定 */}
+      <section className="card">
+        <div className="card-title">常用班表設定（快速新增班次）</div>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '-6px 0 16px' }}>
+          設定你每個月經常打工的時間與地點。在「新增記錄」頁面可一鍵套用，或按星期批次產生整月班表！
+        </p>
+
+        <div className="form-grid">
+          <div className="form-group full">
+            <label>常用店家</label>
+            <select
+              value={schedule.store || ''}
+              onChange={(e) => setSchedule((s) => ({ ...s, store: e.target.value }))}
+            >
+              <option value="">-- 選擇常用店家 --</option>
+              {stores.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>常用上班時間</label>
+            <input
+              type="text"
+              placeholder="例如 09:00"
+              value={schedule.start_time || ''}
+              onChange={(e) => setSchedule((s) => ({ ...s, start_time: e.target.value }))}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>常用下班時間</label>
+            <input
+              type="text"
+              placeholder="例如 18:00"
+              value={schedule.end_time || ''}
+              onChange={(e) => setSchedule((s) => ({ ...s, end_time: e.target.value }))}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>常用時薪</label>
+            <input
+              type="number"
+              placeholder="留空則使用預設時薪"
+              value={schedule.hourly_wage || ''}
+              onChange={(e) => setSchedule((s) => ({ ...s, hourly_wage: e.target.value }))}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>備註說明</label>
+            <input
+              type="text"
+              placeholder="例如：固定平日早班"
+              value={schedule.notes || ''}
+              onChange={(e) => setSchedule((s) => ({ ...s, notes: e.target.value }))}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 14 }}>
+          <button type="button" className="btn btn-primary" onClick={saveSchedule}>
+            儲存常用班表設定
+          </button>
+          {scheduleSaved && <span style={{ color: 'var(--success, #10b981)', fontSize: '0.9rem' }}>✓ 已儲存設定！</span>}
         </div>
       </section>
 

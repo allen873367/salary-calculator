@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Store(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='stores', null=True, blank=True)
+    name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -10,6 +11,7 @@ class Store(models.Model):
 
     class Meta:
         ordering = ['name']
+        unique_together = [('user', 'name')]
 
 class WorkRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='records')
@@ -25,20 +27,27 @@ class WorkRecord(models.Model):
     overtime_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     overtime_rate = models.DecimalField(max_digits=3, decimal_places=2, default=1.33)
     subsidy = models.PositiveIntegerField(default=0, verbose_name='津貼')
+    insurance = models.PositiveIntegerField(default=0, verbose_name='勞健保自付額')
     notes = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def total_pay(self):
-        # 本薪不含加班倍率；加班重疊部分從上班時數扣掉
-        base_hours = max(float(self.hours) - float(self.overtime_hours), 0)
-        base = base_hours * float(self.hourly_wage) * float(self.rate_multiplier)
+        # 實領薪資：本薪 + 加班費 + 津貼 - 勞健保自付額
+        base = float(self.hours) * float(self.hourly_wage) * float(self.rate_multiplier)
+        overtime = float(self.overtime_hours) * float(self.hourly_wage) * float(self.overtime_rate)
+        return max(round(base + overtime + self.subsidy - self.insurance), 0)
+
+    @property
+    def gross_pay(self):
+        """應發薪資 (未扣勞健保)"""
+        base = float(self.hours) * float(self.hourly_wage) * float(self.rate_multiplier)
         overtime = float(self.overtime_hours) * float(self.hourly_wage) * float(self.overtime_rate)
         return round(base + overtime + self.subsidy)
 
     @property
     def base_hours(self):
-        return max(float(self.hours) - float(self.overtime_hours), 0)
+        return float(self.hours)
 
     class Meta:
         ordering = ['-date', '-created_at']
